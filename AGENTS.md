@@ -30,3 +30,15 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - Supabase lib in `src/lib/supabase/`
 - Components in `src/components/`
 - Run `npm run build` to verify before committing
+
+## Next Session — MVP v0.1
+
+Where we left off: project scaffolded, auth set up, schema ready.
+
+1. **Configurar Supabase** — crear proyecto, copiar `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_ANON_KEY` a `.env.local`, correr migración SQL
+2. **Crear grupos** — formulario + lógica
+3. **Unirse a grupos**
+4. **Subir fotos** — con Supabase Storage
+5. **Aprobar/rechazar** — panel de admin
+6. **Comentar fotos**
+7. **Dashboard del grupo** — grilla + pendientes
