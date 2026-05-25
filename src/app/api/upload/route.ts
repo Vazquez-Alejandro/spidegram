@@ -36,13 +36,24 @@ export async function POST(request: Request) {
     data: { publicUrl },
   } = supabase.storage.from("photos").getPublicUrl(filePath)
 
+  const { data: membership } = await supabase
+    .from("group_members")
+    .select("role")
+    .eq("group_id", groupId)
+    .eq("user_id", user.id)
+    .single()
+
+  const isAdmin = membership?.role === "admin"
+
   const { error: dbError } = await supabase.from("photos").insert({
     group_id: groupId,
     uploader_id: user.id,
     url: publicUrl,
     caption: caption || null,
     is_public: isPublic,
-    status: "pending",
+    status: isAdmin ? "approved" : "pending",
+    approved_by: isAdmin ? user.id : null,
+    approved_at: isAdmin ? new Date().toISOString() : null,
   })
 
   if (dbError) {
