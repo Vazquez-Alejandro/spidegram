@@ -53,7 +53,7 @@ begin
   end if;
   if new.status = 'rejected' and old.status = 'pending' then
     insert into notifications (user_id, type, actor_id, group_id, photo_id)
-    values (new.uploader_id, 'photo_rejected', old.approved_by, new.group_id, new.id);
+    values (new.uploader_id, 'photo_rejected', auth.uid(), new.group_id, new.id);
   end if;
   return new;
 end;
