@@ -36,23 +36,41 @@ export default async function GroupPage(props: {
 
   const { data: members } = await supabase
     .from("group_members")
-    .select("*, profiles(username, full_name, avatar_url)")
+    .select("id, user_id, role, joined_at")
     .eq("group_id", id)
+
+  const { data: memberProfiles } = members?.length
+    ? await supabase
+        .from("profiles")
+        .select("id, username, full_name, avatar_url")
+        .in("id", members.map((m) => m.user_id))
+    : { data: [] }
+
+  const memberMap = new Map(memberProfiles?.map((p) => [p.id, p]) ?? [])
 
   const isAdmin = member.role === "admin"
 
   const { data: pendingPhotos } = isAdmin
     ? await supabase
         .from("photos")
-        .select("*, profiles(username, full_name)")
+        .select("*")
         .eq("group_id", id)
         .eq("status", "pending")
         .order("created_at", { ascending: false })
     : { data: [] }
 
+  const { data: uploaderIds } = pendingPhotos?.length
+    ? await supabase
+        .from("profiles")
+        .select("id, username, full_name")
+        .in("id", pendingPhotos.map((p) => p.uploader_id))
+    : { data: [] }
+
+  const uploaderMap = new Map(uploaderIds?.map((p) => [p.id, p]) ?? [])
+
   const { data: approvedPhotos } = await supabase
     .from("photos")
-    .select("*, profiles(username, full_name)")
+    .select("*")
     .eq("group_id", id)
     .eq("status", "approved")
     .order("created_at", { ascending: false })
@@ -90,7 +108,9 @@ export default async function GroupPage(props: {
               className="flex items-center gap-2 rounded-full bg-gray-900 px-3 py-1 text-sm"
             >
               <span>
-                {m.profiles?.full_name || m.profiles?.username || m.user_id.slice(0, 8)}
+                {memberMap.get(m.user_id)?.full_name ||
+                  memberMap.get(m.user_id)?.username ||
+                  m.user_id.slice(0, 8)}
               </span>
               {m.role === "admin" && (
                 <span className="text-xs text-primary">· admin</span>
@@ -128,7 +148,9 @@ export default async function GroupPage(props: {
                     <p className="text-xs text-gray-400 truncate">{photo.caption}</p>
                   )}
                   <p className="text-xs text-gray-500">
-                    by {photo.profiles?.username || photo.profiles?.full_name || "Unknown"}
+                    by {uploaderMap.get(photo.uploader_id)?.username ||
+                      uploaderMap.get(photo.uploader_id)?.full_name ||
+                      "Unknown"}
                   </p>
                   <div className="flex gap-2">
                     <form action={approvePhoto.bind(null, photo.id)}>

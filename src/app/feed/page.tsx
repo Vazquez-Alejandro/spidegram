@@ -23,7 +23,7 @@ export default async function FeedPage() {
 
   const myGroupIds = myGroups?.map((g) => g.group_id) ?? []
 
-  let feed: {
+  type FlatPhoto = {
     id: string
     url: string
     caption: string | null
@@ -31,15 +31,14 @@ export default async function FeedPage() {
     created_at: string
     uploader_id: string
     group_id: string
-    profiles: { username: string | null; full_name: string | null; avatar_url: string | null } | null
-    groups: { name: string } | null
-    reactions: { user_id: string }[]
-  }[] = []
+  }
+
+  let photos: FlatPhoto[] = []
 
   if (followingIds.length > 0 || myGroupIds.length > 0) {
     const query = supabase
       .from("photos")
-      .select("*, profiles(username, full_name, avatar_url), groups(name), reactions(user_id)")
+      .select("*")
       .eq("status", "approved")
       .order("created_at", { ascending: false })
       .limit(50)
@@ -55,17 +54,30 @@ export default async function FeedPage() {
       query.in("group_id", myGroupIds)
     }
 
-    const { data } = await query as unknown as {
-      data: typeof feed
-    }
-    feed = data ?? []
+    const { data } = await query
+    photos = (data ?? []) as FlatPhoto[]
   }
+
+  const allUserIds = [...new Set(photos.map((p) => p.uploader_id))]
+  const allGroupIds = [...new Set(photos.map((p) => p.group_id))]
+
+  const [{ data: profiles }, { data: groups }] = await Promise.all([
+    allUserIds.length
+      ? supabase.from("profiles").select("id, username, full_name").in("id", allUserIds)
+      : { data: [] },
+    allGroupIds.length
+      ? supabase.from("groups").select("id, name").in("id", allGroupIds)
+      : { data: [] },
+  ])
+
+  const profileMap = new Map(profiles?.map((p) => [p.id, p]) ?? [])
+  const groupMap = new Map(groups?.map((g) => [g.id, g]) ?? [])
 
   return (
     <main className="flex-1 mx-auto max-w-2xl w-full px-4 py-8">
       <h1 className="text-2xl font-bold mb-6">Feed</h1>
 
-      {feed.length === 0 ? (
+      {photos.length === 0 ? (
         <div className="text-center py-16 text-gray-500">
           <p className="text-lg">Your feed is empty.</p>
           <p className="mt-2">
@@ -80,47 +92,43 @@ export default async function FeedPage() {
         </div>
       ) : (
         <div className="space-y-8">
-          {feed.map((photo) => (
-            <a
-              key={photo.id}
-              href={`/photos/${photo.id}`}
-              className="block rounded-xl border border-gray-800 bg-gray-900 overflow-hidden hover:border-gray-700 transition-colors"
-            >
-              <img
-                src={photo.url}
-                alt={photo.caption ?? ""}
-                className="w-full max-h-[600px] object-cover"
-              />
-              <div className="p-4 space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center text-xs text-primary font-medium">
-                      {photo.profiles?.full_name?.charAt(0) ||
-                        photo.profiles?.username?.charAt(0) ||
-                        "?"}
+          {photos.map((photo) => {
+            const profile = profileMap.get(photo.uploader_id)
+            const group = groupMap.get(photo.group_id)
+            return (
+              <a
+                key={photo.id}
+                href={`/photos/${photo.id}`}
+                className="block rounded-xl border border-gray-800 bg-gray-900 overflow-hidden hover:border-gray-700 transition-colors"
+              >
+                <img
+                  src={photo.url}
+                  alt={photo.caption ?? ""}
+                  className="w-full max-h-[600px] object-cover"
+                />
+                <div className="p-4 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center text-xs text-primary font-medium">
+                        {profile?.full_name?.charAt(0) ||
+                          profile?.username?.charAt(0) ||
+                          "?"}
+                      </div>
+                      <span className="text-sm font-medium">
+                        {profile?.full_name || profile?.username || "Unknown"}
+                      </span>
                     </div>
-                    <span className="text-sm font-medium">
-                      {photo.profiles?.full_name ||
-                        photo.profiles?.username ||
-                        "Unknown"}
+                    <span className="text-xs text-gray-500">
+                      {group?.name}
                     </span>
                   </div>
-                  <span className="text-xs text-gray-500">
-                    {photo.groups?.name}
-                  </span>
+                  {photo.caption && (
+                    <p className="text-sm text-gray-300">{photo.caption}</p>
+                  )}
                 </div>
-                {photo.caption && (
-                  <p className="text-sm text-gray-300">{photo.caption}</p>
-                )}
-                <div className="flex items-center gap-4 text-xs text-gray-500">
-                  <span>
-                    {photo.reactions?.length ?? 0}{" "}
-                    {photo.reactions?.length === 1 ? "like" : "likes"}
-                  </span>
-                </div>
-              </div>
-            </a>
-          ))}
+              </a>
+            )
+          })}
         </div>
       )}
     </main>

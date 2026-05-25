@@ -21,23 +21,35 @@ export default async function PhotoPage(props: {
 
   if (!photo) redirect("/dashboard")
 
+  const { data: membership } = await supabase
+    .from("group_members")
+    .select("id")
+    .eq("group_id", photo.group_id)
+    .eq("user_id", user.id)
+    .maybeSingle()
+
   const canView =
-    photo.status === "approved" &&
-    (photo.is_public ||
-      (await supabase
-        .from("group_members")
-        .select("id")
-        .eq("group_id", photo.group_id)
-        .eq("user_id", user.id)
-        .maybeSingle())?.data)
+    photo.status === "approved" && (photo.is_public || membership)
 
   if (!canView) redirect("/dashboard")
 
-  const { data: comments } = await supabase
+  const { data: rawComments } = await supabase
     .from("photo_comments")
-    .select("*, profiles(username, full_name, avatar_url)")
+    .select("*")
     .eq("photo_id", id)
     .order("created_at", { ascending: true })
+
+  const comments = rawComments ?? []
+
+  const commentUserIds = [...new Set(comments.map((c) => c.user_id))]
+  const { data: commentProfiles } = commentUserIds.length
+    ? await supabase
+        .from("profiles")
+        .select("id, username, full_name")
+        .in("id", commentUserIds)
+    : { data: [] }
+
+  const profileMap = new Map(commentProfiles?.map((p) => [p.id, p]) ?? [])
 
   const { data: reactions } = await supabase
     .from("reactions")
@@ -94,16 +106,18 @@ export default async function PhotoPage(props: {
 
           <div className="flex-1">
             <h3 className="font-semibold mb-3">
-              Comments ({comments?.length ?? 0})
+              Comments ({comments.length})
             </h3>
             <div className="space-y-3 mb-4 max-h-80 overflow-y-auto">
-              {!comments || comments.length === 0 ? (
+              {comments.length === 0 ? (
                 <p className="text-sm text-gray-500">No comments yet.</p>
               ) : (
                 comments.map((c) => (
                   <div key={c.id} className="text-sm">
                     <span className="font-medium text-primary">
-                      {c.profiles?.full_name || c.profiles?.username || "Anon"}
+                      {profileMap.get(c.user_id)?.full_name ||
+                        profileMap.get(c.user_id)?.username ||
+                        "Anon"}
                     </span>
                     <span className="text-gray-300 ml-2">{c.content}</span>
                   </div>
