@@ -71,14 +71,24 @@ create policy "Authenticated users can create groups"
   on groups for insert
   with check (auth.role() = 'authenticated');
 
--- Group members: members can see other members in their groups
+-- Group members: members can see other members in their groups (security definer avoids recursion)
+create or replace function public.is_group_member(group_id uuid)
+returns boolean language sql security definer stable as $$
+  select exists (
+    select 1 from public.group_members
+    where user_id = auth.uid()
+    and group_members.group_id = is_group_member.group_id
+  );
+$$;
+
+drop policy if exists "Members can view group members" on group_members;
 create policy "Members can view group members"
   on group_members for select
-  using (
-    group_id in (
-      select group_id from group_members where user_id = auth.uid()
-    )
-  );
+  using (public.is_group_member(group_id));
+
+create policy "Users can join groups"
+  on group_members for insert
+  with check (auth.uid() = user_id);
 
 -- Photos: approved photos visible to members, pending to uploader and admins
 create policy "Members can view approved photos"

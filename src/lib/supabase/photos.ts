@@ -5,7 +5,7 @@ import { redirect } from "next/navigation"
 
 import { createClient } from "@/lib/supabase/server"
 
-export async function uploadPhoto(groupId: string, formData: FormData) {
+export async function uploadPhoto(formData: FormData) {
   const supabase = await createClient()
 
   const {
@@ -13,6 +13,7 @@ export async function uploadPhoto(groupId: string, formData: FormData) {
   } = await supabase.auth.getUser()
   if (!user) redirect("/auth/sign-in")
 
+  const groupId = formData.get("groupId") as string
   const file = formData.get("file") as File
   const caption = formData.get("caption") as string
   const isPublic = formData.get("is_public") === "on"

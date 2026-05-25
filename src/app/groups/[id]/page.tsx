@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
-import { leaveGroup } from "@/lib/supabase/groups"
 import { approvePhoto, rejectPhoto } from "@/lib/supabase/photos"
 import { PhotoUpload } from "@/components/photo-upload"
+import { LeaveGroupButton } from "@/components/leave-group-button"
 
 export default async function GroupPage(props: {
   params: Promise<{ id: string }>
@@ -77,21 +77,7 @@ export default async function GroupPage(props: {
           </p>
         </div>
         <div className="flex gap-3">
-          <form
-            action={leaveGroup.bind(null, id)}
-            onSubmit={(e) => {
-              if (!confirm("Are you sure you want to leave this group?")) {
-                e.preventDefault()
-              }
-            }}
-          >
-            <button
-              type="submit"
-              className="rounded-lg border border-red-900 text-red-400 px-4 py-2 text-sm font-medium hover:bg-red-950 transition-colors"
-            >
-              Leave
-            </button>
-          </form>
+          <LeaveGroupButton groupId={id} />
         </div>
       </div>
 

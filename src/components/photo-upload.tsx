@@ -17,9 +17,11 @@ export function PhotoUpload({ groupId }: { groupId: string }) {
   return (
     <form
       ref={formRef}
-      action={uploadPhoto.bind(null, groupId)}
+      action={uploadPhoto}
       className="rounded-xl border border-dashed border-gray-700 bg-gray-900/50 p-6"
     >
+      <input type="hidden" name="groupId" value={groupId} />
+
       <div className="flex flex-col items-center gap-4">
         {preview ? (
           <div className="relative w-full max-w-xs aspect-square rounded-lg overflow-hidden">

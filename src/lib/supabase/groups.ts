@@ -59,13 +59,15 @@ export async function joinGroup(formData: FormData) {
   redirect(`/groups/${groupId}`)
 }
 
-export async function leaveGroup(groupId: string) {
+export async function leaveGroup(formData: FormData) {
   const supabase = await createClient()
 
   const {
     data: { user },
   } = await supabase.auth.getUser()
   if (!user) redirect("/auth/sign-in")
+
+  const groupId = formData.get("groupId") as string
 
   await supabase
     .from("group_members")
