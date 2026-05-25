@@ -1,20 +1,23 @@
 "use client"
 
-import { useRouter } from "next/navigation"
 import { approvePhoto, rejectPhoto } from "@/lib/supabase/photos"
 
-export function PendingPhotoActions({ photoId }: { photoId: string }) {
-  const router = useRouter()
-
+export function PendingPhotoActions({
+  photoId,
+  groupId,
+}: {
+  photoId: string
+  groupId: string
+}) {
   async function handleApprove() {
-    await approvePhoto(photoId)
-    router.refresh()
+    await approvePhoto(photoId, groupId)
+    window.location.reload()
   }
 
   async function handleReject() {
     if (!confirm("Are you sure you want to reject this photo?")) return
-    await rejectPhoto(photoId)
-    router.refresh()
+    await rejectPhoto(photoId, groupId)
+    window.location.reload()
   }
 
   return (

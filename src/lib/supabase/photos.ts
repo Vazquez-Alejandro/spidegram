@@ -54,7 +54,7 @@ export async function uploadPhoto(formData: FormData) {
   return { success: true, groupId }
 }
 
-export async function approvePhoto(photoId: string) {
+export async function approvePhoto(photoId: string, groupId?: string) {
   const supabase = await createClient()
 
   const {
@@ -73,10 +73,10 @@ export async function approvePhoto(photoId: string) {
 
   if (error) return { error: error.message }
 
-  revalidatePath("/groups/[id]", "layout")
+  if (groupId) revalidatePath(`/groups/${groupId}`)
 }
 
-export async function rejectPhoto(photoId: string) {
+export async function rejectPhoto(photoId: string, groupId?: string) {
   const supabase = await createClient()
 
   const {
@@ -91,7 +91,7 @@ export async function rejectPhoto(photoId: string) {
 
   if (error) return { error: error.message }
 
-  revalidatePath("/groups/[id]", "layout")
+  if (groupId) revalidatePath(`/groups/${groupId}`)
 }
 
 export async function addComment(photoId: string, formData: FormData) {

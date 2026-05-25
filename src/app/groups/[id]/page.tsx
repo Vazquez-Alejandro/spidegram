@@ -153,7 +153,7 @@ export default async function GroupPage(props: {
                       uploaderMap.get(photo.uploader_id)?.full_name ||
                       "Unknown"}
                   </p>
-                  <PendingPhotoActions photoId={photo.id} />
+                  <PendingPhotoActions photoId={photo.id} groupId={id} />
                 </div>
               </div>
             ))}
