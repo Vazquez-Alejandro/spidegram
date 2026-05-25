@@ -19,26 +19,32 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - Auth callback at `/auth/callback`
 
 ## Database
-- Schema: `supabase/migrations/00001_initial_schema.sql`
-- Tables: groups, group_members, photos, photo_comments
-- RLS: group-scoped access (members/admins only)
+- Schema: `supabase/migrations/00001_initial_schema.sql` + `00002_social_features.sql`
+- Tables: groups, group_members, photos, photo_comments, friendships, reactions, profiles
+- RLS: group-scoped access (members/admins only), friendships, reactions, public photo comments
 
 ## Conventions
 - `params` and `searchParams` are Promises — always `await`
 - `cookies()` and `headers()` are async — always `await`
 - Types in `src/types/`
 - Supabase lib in `src/lib/supabase/`
+- Group actions in `src/lib/supabase/groups.ts`
 - Components in `src/components/`
 - Run `npm run build` to verify before committing
 
-## Next Session — MVP v0.1
+## Progress — MVP v0.1
 
-Where we left off: project scaffolded, auth set up, schema ready.
-
-1. **Configurar Supabase** — crear proyecto, copiar `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_ANON_KEY` a `.env.local`, correr migración SQL
-2. **Crear grupos** — formulario + lógica
-3. **Unirse a grupos**
-4. **Subir fotos** — con Supabase Storage
-5. **Aprobar/rechazar** — panel de admin
-6. **Comentar fotos**
-7. **Dashboard del grupo** — grilla + pendientes
+- [x] Auth completo — registro, login, logout
+- [x] Schema inicial + migraciones
+- [x] Crear grupos — formulario + Server Action
+- [x] Unirse a grupos — por ID
+- [x] Dashboard de usuario — lista de grupos
+- [x] Página de detalle de grupo — miembros, foto grilla
+- [x] Social features schema — friendships, reactions, profiles
+- [x] Subir fotos — formulario upload + Server Action + Supabase Storage
+- [x] Aprobar/rechazar — panel de admin en grupo
+- [x] Comentar fotos — formulario + listado en foto individual
+- [x] Dashboard de grupo — upload, pendientes (admin), grilla aprobadas
+- [x] Feed social — fotos públicas de amigos
+- [x] Seguir/amigos — UI de friendships + búsqueda
+- [x] Notificaciones — schema + triggers + página + badge en navbar

@@ -2,12 +2,15 @@ export type GroupRole = "admin" | "member"
 
 export type PhotoStatus = "pending" | "approved" | "rejected"
 
+export type ReactionType = "like"
+
 export interface Profile {
   id: string
-  username: string
+  username: string | null
   full_name: string | null
   avatar_url: string | null
   created_at: string
+  updated_at: string
 }
 
 export interface Group {
@@ -26,6 +29,11 @@ export interface GroupMember {
   user_id: string
   role: GroupRole
   joined_at: string
+}
+
+export interface GroupWithMemberCount extends Group {
+  member_count: number
+  role: GroupRole
 }
 
 export interface Photo {
@@ -48,5 +56,38 @@ export interface PhotoComment {
   photo_id: string
   user_id: string
   content: string
+  created_at: string
+}
+
+export interface Friendship {
+  id: string
+  follower_id: string
+  following_id: string
+  created_at: string
+}
+
+export interface Reaction {
+  id: string
+  photo_id: string
+  user_id: string
+  type: ReactionType
+  created_at: string
+}
+
+export type NotificationType =
+  | "photo_uploaded"
+  | "photo_approved"
+  | "photo_rejected"
+  | "new_comment"
+  | "new_follower"
+
+export interface Notification {
+  id: string
+  user_id: string
+  type: NotificationType
+  actor_id: string
+  group_id: string | null
+  photo_id: string | null
+  read: boolean
   created_at: string
 }

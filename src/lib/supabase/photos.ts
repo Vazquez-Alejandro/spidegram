@@ -1,0 +1,137 @@
+"use server"
+
+import { revalidatePath } from "next/cache"
+import { redirect } from "next/navigation"
+
+import { createClient } from "@/lib/supabase/server"
+
+export async function uploadPhoto(groupId: string, formData: FormData) {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) redirect("/auth/sign-in")
+
+  const file = formData.get("file") as File
+  const caption = formData.get("caption") as string
+  const isPublic = formData.get("is_public") === "on"
+
+  if (!file || file.size === 0) {
+    redirect(`/groups/${groupId}?error=No file selected`)
+  }
+
+  const ext = file.name.split(".").pop()
+  const filePath = `${groupId}/${user.id}/${crypto.randomUUID()}.${ext}`
+
+  const { error: uploadError } = await supabase.storage
+    .from("photos")
+    .upload(filePath, file)
+
+  if (uploadError) {
+    redirect(`/groups/${groupId}?error=${encodeURIComponent(uploadError.message)}`)
+  }
+
+  const {
+    data: { publicUrl },
+  } = supabase.storage.from("photos").getPublicUrl(filePath)
+
+  const { error: dbError } = await supabase.from("photos").insert({
+    group_id: groupId,
+    uploader_id: user.id,
+    url: publicUrl,
+    caption: caption || null,
+    is_public: isPublic,
+    status: "pending",
+  })
+
+  if (dbError) {
+    redirect(`/groups/${groupId}?error=${encodeURIComponent(dbError.message)}`)
+  }
+
+  revalidatePath(`/groups/${groupId}`)
+  redirect(`/groups/${groupId}`)
+}
+
+export async function approvePhoto(photoId: string) {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) redirect("/auth/sign-in")
+
+  const { error } = await supabase
+    .from("photos")
+    .update({
+      status: "approved",
+      approved_by: user.id,
+      approved_at: new Date().toISOString(),
+    })
+    .eq("id", photoId)
+
+  if (error) redirect(`/auth/error?message=${encodeURIComponent(error.message)}`)
+
+  revalidatePath("/groups/[id]", "layout")
+}
+
+export async function rejectPhoto(photoId: string) {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) redirect("/auth/sign-in")
+
+  await supabase.from("photos").update({ status: "rejected" }).eq("id", photoId)
+
+  revalidatePath("/groups/[id]", "layout")
+}
+
+export async function addComment(photoId: string, formData: FormData) {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) redirect("/auth/sign-in")
+
+  const content = formData.get("content") as string
+  if (!content?.trim()) return
+
+  await supabase.from("photo_comments").insert({
+    photo_id: photoId,
+    user_id: user.id,
+    content: content.trim(),
+  })
+
+  revalidatePath(`/photos/${photoId}`)
+  revalidatePath("/groups/[id]", "layout")
+}
+
+export async function toggleReaction(photoId: string) {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) redirect("/auth/sign-in")
+
+  const { data: existing } = await supabase
+    .from("reactions")
+    .select("id")
+    .eq("photo_id", photoId)
+    .eq("user_id", user.id)
+    .single()
+
+  if (existing) {
+    await supabase.from("reactions").delete().eq("id", existing.id)
+  } else {
+    await supabase.from("reactions").insert({
+      photo_id: photoId,
+      user_id: user.id,
+    })
+  }
+
+  revalidatePath(`/photos/${photoId}`)
+}

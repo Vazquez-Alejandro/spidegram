@@ -1,4 +1,14 @@
-export default function Home() {
+import { redirect } from "next/navigation"
+import { createClient } from "@/lib/supabase/server"
+
+export default async function Home() {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (user) redirect("/dashboard")
+
   return (
     <main className="flex-1 flex flex-col items-center justify-center px-4">
       <div className="flex flex-col items-center gap-6 max-w-md text-center">
