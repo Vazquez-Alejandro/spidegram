@@ -60,7 +60,7 @@ export async function approvePhoto(photoId: string) {
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  if (!user) redirect("/auth/sign-in")
+  if (!user) return { error: "Not authenticated" }
 
   const { error } = await supabase
     .from("photos")
@@ -71,7 +71,7 @@ export async function approvePhoto(photoId: string) {
     })
     .eq("id", photoId)
 
-  if (error) redirect(`/auth/error?message=${encodeURIComponent(error.message)}`)
+  if (error) return { error: error.message }
 
   revalidatePath("/groups/[id]", "layout")
 }
@@ -82,9 +82,14 @@ export async function rejectPhoto(photoId: string) {
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  if (!user) redirect("/auth/sign-in")
+  if (!user) return { error: "Not authenticated" }
 
-  await supabase.from("photos").update({ status: "rejected" }).eq("id", photoId)
+  const { error } = await supabase
+    .from("photos")
+    .update({ status: "rejected" })
+    .eq("id", photoId)
+
+  if (error) return { error: error.message }
 
   revalidatePath("/groups/[id]", "layout")
 }

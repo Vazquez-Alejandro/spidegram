@@ -1,8 +1,9 @@
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
-import { approvePhoto, rejectPhoto } from "@/lib/supabase/photos"
 import { PhotoUpload } from "@/components/photo-upload"
 import { LeaveGroupButton } from "@/components/leave-group-button"
+import { PendingPhotoActions } from "@/components/pending-photo-actions"
+import { PhotoLightbox } from "@/components/photo-lightbox"
 
 export default async function GroupPage(props: {
   params: Promise<{ id: string }>
@@ -152,24 +153,7 @@ export default async function GroupPage(props: {
                       uploaderMap.get(photo.uploader_id)?.full_name ||
                       "Unknown"}
                   </p>
-                  <div className="flex gap-2">
-                    <form action={approvePhoto.bind(null, photo.id)}>
-                      <button
-                        type="submit"
-                        className="rounded-lg bg-green-700 px-3 py-1 text-xs font-medium hover:bg-green-600 transition-colors"
-                      >
-                        Approve
-                      </button>
-                    </form>
-                    <form action={rejectPhoto.bind(null, photo.id)}>
-                      <button
-                        type="submit"
-                        className="rounded-lg bg-red-800 px-3 py-1 text-xs font-medium hover:bg-red-700 transition-colors"
-                      >
-                        Reject
-                      </button>
-                    </form>
-                  </div>
+                  <PendingPhotoActions photoId={photo.id} />
                 </div>
               </div>
             ))}
@@ -188,22 +172,24 @@ export default async function GroupPage(props: {
         ) : (
           <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
             {approvedPhotos.map((photo) => (
-              <a
+              <div
                 key={photo.id}
-                href={`/photos/${photo.id}`}
                 className="aspect-square rounded-xl bg-gray-800 overflow-hidden group relative"
               >
-                <img
-                  src={photo.url}
-                  alt={photo.caption ?? ""}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                />
-                {photo.caption && (
-                  <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/60 to-transparent p-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <p className="text-xs truncate">{photo.caption}</p>
-                  </div>
-                )}
-              </a>
+                <PhotoLightbox src={photo.url} alt={photo.caption ?? ""}>
+                  <img
+                    src={photo.url}
+                    alt={photo.caption ?? ""}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                  />
+                </PhotoLightbox>
+                <a
+                  href={`/photos/${photo.id}`}
+                  className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/60 to-transparent p-2 opacity-0 group-hover:opacity-100 transition-opacity hover:opacity-100"
+                >
+                  <p className="text-xs truncate">{photo.caption}</p>
+                </a>
+              </div>
             ))}
           </div>
         )}
