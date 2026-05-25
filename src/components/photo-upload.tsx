@@ -1,49 +1,45 @@
 "use client"
 
-import { useRef, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useRef } from "react"
 
 export function PhotoUpload({ groupId }: { groupId: string }) {
   const [preview, setPreview] = useState<string | null>(null)
-  const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const formRef = useRef<HTMLFormElement>(null)
-  const router = useRouter()
+  const [file, setFile] = useState<File | null>(null)
+  const fileRef = useRef<HTMLInputElement>(null)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    setUploading(true)
     setError(null)
 
-    const formData = new FormData(e.currentTarget as HTMLFormElement)
+    if (!file) {
+      setError("No file selected")
+      return
+    }
 
-    const res = await fetch("/api/upload", {
-      method: "POST",
-      body: formData,
-    })
+    const formData = new FormData()
+    formData.append("groupId", groupId)
+    formData.append("file", file)
 
+    const caption = fileRef.current?.form?.querySelector<HTMLInputElement>("[name=caption]")?.value
+    if (caption) formData.append("caption", caption)
+
+    const isPublic = fileRef.current?.form?.querySelector<HTMLInputElement>("[name=is_public]")?.checked
+    if (isPublic) formData.append("is_public", "on")
+
+    const res = await fetch("/api/upload", { method: "POST", body: formData })
     const data = await res.json()
 
     if (data.error) {
       setError(data.error)
-      setUploading(false)
       return
     }
 
-    router.push(`/groups/${data.groupId}`)
-    router.refresh()
-  }
-
-  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (file) {
-      setPreview(URL.createObjectURL(file))
-    }
+    window.location.href = `/groups/${data.groupId}`
   }
 
   return (
     <form
-      ref={formRef}
       onSubmit={handleSubmit}
       className="rounded-xl border border-dashed border-gray-700 bg-gray-900/50 p-6"
     >
@@ -51,17 +47,18 @@ export function PhotoUpload({ groupId }: { groupId: string }) {
 
       <div className="flex flex-col items-center gap-4">
         {preview ? (
-          <div className="relative w-full max-w-xs aspect-square rounded-lg overflow-hidden">
+          <div className="relative w-full max-w-xs">
             <img
               src={preview}
               alt="Preview"
-              className="w-full h-full object-cover"
+              className="w-full aspect-square rounded-lg object-cover"
             />
             <button
               type="button"
               onClick={() => {
                 setPreview(null)
-                formRef.current?.reset()
+                setFile(null)
+                if (fileRef.current) fileRef.current.value = ""
               }}
               className="absolute top-2 right-2 rounded-full bg-black/60 p-1 text-sm"
             >
@@ -71,11 +68,16 @@ export function PhotoUpload({ groupId }: { groupId: string }) {
         ) : (
           <label className="flex flex-col items-center gap-2 cursor-pointer text-gray-400 hover:text-white transition-colors">
             <input
+              ref={fileRef}
               type="file"
-              name="file"
               accept="image/*"
-              required
-              onChange={handleFileChange}
+              onChange={(e) => {
+                const f = e.target.files?.[0]
+                if (f) {
+                  setFile(f)
+                  setPreview(URL.createObjectURL(f))
+                }
+              }}
               className="hidden"
             />
             <div className="rounded-full border border-gray-700 p-3">
@@ -95,25 +97,18 @@ export function PhotoUpload({ groupId }: { groupId: string }) {
         />
 
         <label className="flex items-center gap-2 text-sm text-gray-400">
-          <input
-            type="checkbox"
-            name="is_public"
-            className="rounded border-gray-700 bg-transparent"
-          />
+          <input type="checkbox" name="is_public" className="rounded border-gray-700 bg-transparent" />
           Make public (visible to everyone)
         </label>
 
-        {error && (
-          <p className="text-sm text-red-400">{error}</p>
-        )}
+        {error && <p className="text-sm text-red-400">{error}</p>}
 
         {preview && (
           <button
             type="submit"
-            disabled={uploading}
-            className="rounded-lg bg-primary px-6 py-2 text-sm font-medium hover:bg-primary-hover transition-colors disabled:opacity-50"
+            className="rounded-lg bg-primary px-6 py-2 text-sm font-medium hover:bg-primary-hover transition-colors"
           >
-            {uploading ? "Uploading..." : "Upload photo"}
+            Upload photo
           </button>
         )}
       </div>
