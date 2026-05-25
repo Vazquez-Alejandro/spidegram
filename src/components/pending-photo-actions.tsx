@@ -10,13 +10,21 @@ export function PendingPhotoActions({
   groupId: string
 }) {
   async function handleApprove() {
-    await approvePhoto(photoId, groupId)
+    const result = await approvePhoto(photoId, groupId)
+    if (result?.error) {
+      alert("Error approving: " + result.error)
+      return
+    }
     window.location.reload()
   }
 
   async function handleReject() {
     if (!confirm("Are you sure you want to reject this photo?")) return
-    await rejectPhoto(photoId, groupId)
+    const result = await rejectPhoto(photoId, groupId)
+    if (result?.error) {
+      alert("Error rejecting: " + result.error)
+      return
+    }
     window.location.reload()
   }
 
