@@ -1,11 +1,38 @@
 "use client"
 
 import { useRef, useState } from "react"
-import { uploadPhoto } from "@/lib/supabase/photos"
+import { useRouter } from "next/navigation"
 
 export function PhotoUpload({ groupId }: { groupId: string }) {
   const [preview, setPreview] = useState<string | null>(null)
+  const [uploading, setUploading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const formRef = useRef<HTMLFormElement>(null)
+  const router = useRouter()
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    setUploading(true)
+    setError(null)
+
+    const formData = new FormData(e.currentTarget as HTMLFormElement)
+
+    const res = await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
+    })
+
+    const data = await res.json()
+
+    if (data.error) {
+      setError(data.error)
+      setUploading(false)
+      return
+    }
+
+    router.push(`/groups/${data.groupId}`)
+    router.refresh()
+  }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -17,7 +44,7 @@ export function PhotoUpload({ groupId }: { groupId: string }) {
   return (
     <form
       ref={formRef}
-      action={uploadPhoto}
+      onSubmit={handleSubmit}
       className="rounded-xl border border-dashed border-gray-700 bg-gray-900/50 p-6"
     >
       <input type="hidden" name="groupId" value={groupId} />
@@ -76,12 +103,17 @@ export function PhotoUpload({ groupId }: { groupId: string }) {
           Make public (visible to everyone)
         </label>
 
+        {error && (
+          <p className="text-sm text-red-400">{error}</p>
+        )}
+
         {preview && (
           <button
             type="submit"
-            className="rounded-lg bg-primary px-6 py-2 text-sm font-medium hover:bg-primary-hover transition-colors"
+            disabled={uploading}
+            className="rounded-lg bg-primary px-6 py-2 text-sm font-medium hover:bg-primary-hover transition-colors disabled:opacity-50"
           >
-            Upload photo
+            {uploading ? "Uploading..." : "Upload photo"}
           </button>
         )}
       </div>

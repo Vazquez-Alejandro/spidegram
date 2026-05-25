@@ -11,7 +11,7 @@ export async function uploadPhoto(formData: FormData) {
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  if (!user) redirect("/auth/sign-in")
+  if (!user) return { error: "Not authenticated" }
 
   const groupId = formData.get("groupId") as string
   const file = formData.get("file") as File
@@ -19,7 +19,7 @@ export async function uploadPhoto(formData: FormData) {
   const isPublic = formData.get("is_public") === "on"
 
   if (!file || file.size === 0) {
-    redirect(`/groups/${groupId}?error=No file selected`)
+    return { error: "No file selected" }
   }
 
   const ext = file.name.split(".").pop()
@@ -30,7 +30,7 @@ export async function uploadPhoto(formData: FormData) {
     .upload(filePath, file)
 
   if (uploadError) {
-    redirect(`/groups/${groupId}?error=${encodeURIComponent(uploadError.message)}`)
+    return { error: uploadError.message }
   }
 
   const {
@@ -47,11 +47,11 @@ export async function uploadPhoto(formData: FormData) {
   })
 
   if (dbError) {
-    redirect(`/groups/${groupId}?error=${encodeURIComponent(dbError.message)}`)
+    return { error: dbError.message }
   }
 
   revalidatePath(`/groups/${groupId}`)
-  redirect(`/groups/${groupId}`)
+  return { success: true, groupId }
 }
 
 export async function approvePhoto(photoId: string) {
