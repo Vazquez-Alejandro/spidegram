@@ -199,6 +199,37 @@ export async function transferOwnership(formData: FormData) {
   revalidatePath(`/groups/${groupId}`)
 }
 
+export async function setGroupCover(formData: FormData) {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return { error: "Not authenticated" }
+
+  const groupId = formData.get("groupId") as string
+  const photoUrl = formData.get("photoUrl") as string
+
+  const { data: member } = await supabase
+    .from("group_members")
+    .select("role")
+    .eq("group_id", groupId)
+    .eq("user_id", user.id)
+    .single()
+
+  if (member?.role !== "admin") return { error: "Not authorized" }
+
+  const { error } = await supabase
+    .from("groups")
+    .update({ cover_url: photoUrl })
+    .eq("id", groupId)
+
+  if (error) return { error: error.message }
+
+  revalidatePath(`/groups/${groupId}`)
+  revalidatePath("/dashboard")
+}
+
 export async function deleteGroup(formData: FormData) {
   const supabase = await createClient()
 

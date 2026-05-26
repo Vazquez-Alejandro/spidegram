@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { PhotoLightbox } from "./photo-lightbox"
+import { useRouter } from "next/navigation"
 
 type Photo = {
   id: string
@@ -15,15 +16,20 @@ export function PhotoGrid({
   initialPhotos,
   groupId,
   pageSize = 12,
+  isAdmin = false,
+  currentCover,
 }: {
   initialPhotos: Photo[]
   groupId: string
   pageSize?: number
+  isAdmin?: boolean
+  currentCover?: string | null
 }) {
   const [photos, setPhotos] = useState<Photo[]>(initialPhotos)
   const [loading, setLoading] = useState(false)
   const [hasMore, setHasMore] = useState(true)
   const loaderRef = useRef<HTMLDivElement>(null)
+  const router = useRouter()
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -59,6 +65,18 @@ export function PhotoGrid({
     return () => { if (el) observer.unobserve(el) }
   }, [photos.length, loading, hasMore, groupId, pageSize])
 
+  async function setCover(photoUrl: string) {
+    const fd = new FormData()
+    fd.set("groupId", groupId)
+    fd.set("photoUrl", photoUrl)
+    await fetch("/api/set-cover", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ groupId, photoUrl }),
+    })
+    router.refresh()
+  }
+
   if (photos.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-gray-500">
@@ -71,29 +89,56 @@ export function PhotoGrid({
   return (
     <>
       <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
-        {photos.map((photo) => (
-          <div
-            key={photo.id}
-            className="aspect-square rounded-2xl bg-surface overflow-hidden group relative ring-1 ring-white/5 hover:ring-primary/30 transition-all"
-          >
-            <PhotoLightbox src={photo.url} alt={photo.caption ?? ""}>
-              <img
-                src={photo.url}
-                alt={photo.caption ?? ""}
-                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-              />
-            </PhotoLightbox>
-            <a
-              href={`/photos/${photo.id}`}
-              className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity p-3 flex flex-col justify-end"
+        {photos.map((photo) => {
+          const isCover = currentCover === photo.url
+          return (
+            <div
+              key={photo.id}
+              className={`aspect-square rounded-2xl bg-surface overflow-hidden group relative ring-1 transition-all ${
+                isCover
+                  ? "ring-primary ring-2"
+                  : "ring-white/5 hover:ring-primary/30"
+              }`}
             >
-              {photo.caption && (
-                <p className="text-sm font-medium truncate drop-shadow-lg">{photo.caption}</p>
+              <PhotoLightbox src={photo.url} alt={photo.caption ?? ""}>
+                <img
+                  src={photo.url}
+                  alt={photo.caption ?? ""}
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                />
+              </PhotoLightbox>
+              {isCover && (
+                <span className="absolute top-2 left-2 text-[10px] font-medium bg-primary/80 text-white px-2 py-0.5 rounded-full backdrop-blur-sm z-10">
+                  Cover
+                </span>
               )}
-              <p className="text-[11px] text-gray-300 mt-0.5">View details →</p>
-            </a>
-          </div>
-        ))}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity p-3 flex flex-col justify-end">
+                {photo.caption && (
+                  <p className="text-sm font-medium truncate drop-shadow-lg">{photo.caption}</p>
+                )}
+                <div className="flex gap-2 mt-1">
+                  <a
+                    href={`/photos/${photo.id}`}
+                    className="text-[11px] text-gray-300 hover:text-white transition-colors"
+                  >
+                    View details →
+                  </a>
+                  {isAdmin && !isCover && (
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault()
+                        setCover(photo.url)
+                      }}
+                      className="text-[11px] text-primary hover:text-white transition-colors"
+                    >
+                      Set as cover
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )
+        })}
       </div>
 
       <div ref={loaderRef} className="flex justify-center py-8">

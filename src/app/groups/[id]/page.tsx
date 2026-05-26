@@ -83,6 +83,13 @@ export default async function GroupPage(props: {
 
   return (
     <main className="flex-1 mx-auto max-w-6xl w-full px-4 py-8">
+      {group.cover_url && (
+        <div className="relative h-48 sm:h-64 rounded-2xl overflow-hidden mb-8 bg-surface ring-1 ring-white/5">
+          <img src={group.cover_url} alt="" className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
+        </div>
+      )}
+
       {uploadError && (
         <div className="mb-6 rounded-xl bg-red-900/40 border border-red-800/50 px-4 py-3 text-sm text-red-300 animate-scale-in">
           {uploadError}
@@ -230,6 +237,8 @@ export default async function GroupPage(props: {
           initialPhotos={(approvedPhotos ?? []).slice(0, 12)}
           groupId={id}
           pageSize={12}
+          isAdmin={isAdmin}
+          currentCover={group.cover_url}
         />
       </section>
     </main>
