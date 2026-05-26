@@ -68,17 +68,63 @@ export default async function PhotoPage(props: {
     .eq("user_id", user.id)
     .maybeSingle()
 
+  const { data: prevPhoto } = await supabase
+    .from("photos")
+    .select("id")
+    .eq("group_id", photo.group_id)
+    .eq("status", "approved")
+    .lt("created_at", photo.created_at)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  const { data: nextPhoto } = await supabase
+    .from("photos")
+    .select("id")
+    .eq("group_id", photo.group_id)
+    .eq("status", "approved")
+    .gt("created_at", photo.created_at)
+    .order("created_at", { ascending: true })
+    .limit(1)
+    .maybeSingle()
+
   return (
     <main className="flex-1 mx-auto max-w-5xl w-full px-4 py-8">
-      <a
-        href={`/groups/${photo.group_id}`}
-        className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-white transition-colors mb-6"
-      >
-        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-        </svg>
-        Back to {photo.groups?.name || "group"}
-      </a>
+      <div className="flex items-center justify-between mb-6">
+        <a
+          href={`/groups/${photo.group_id}`}
+          className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-white transition-colors"
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          Back to {photo.groups?.name || "group"}
+        </a>
+        <div className="flex items-center gap-2">
+          {prevPhoto && (
+            <a
+              href={`/photos/${prevPhoto.id}`}
+              className="flex items-center gap-1 rounded-xl border border-border px-3 py-1.5 text-xs text-gray-400 hover:text-white hover:border-primary/30 transition-all"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              Previous
+            </a>
+          )}
+          {nextPhoto && (
+            <a
+              href={`/photos/${nextPhoto.id}`}
+              className="flex items-center gap-1 rounded-xl border border-border px-3 py-1.5 text-xs text-gray-400 hover:text-white hover:border-primary/30 transition-all"
+            >
+              Next
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </a>
+          )}
+        </div>
+      </div>
 
       <div className="grid md:grid-cols-5 gap-0 md:gap-8">
         <div className="md:col-span-3 rounded-2xl overflow-hidden bg-surface ring-1 ring-white/5">
