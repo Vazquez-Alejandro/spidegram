@@ -32,14 +32,20 @@ export function PendingPhotoActions({
     <div className="flex gap-2">
       <button
         onClick={handleApprove}
-        className="rounded-lg bg-green-700 px-3 py-1 text-xs font-medium hover:bg-green-600 transition-colors"
+        className="flex items-center gap-1 rounded-xl bg-emerald-600/20 text-emerald-400 px-3.5 py-1.5 text-xs font-semibold hover:bg-emerald-600/30 transition-all"
       >
+        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+        </svg>
         Approve
       </button>
       <button
         onClick={handleReject}
-        className="rounded-lg bg-red-800 px-3 py-1 text-xs font-medium hover:bg-red-700 transition-colors"
+        className="flex items-center gap-1 rounded-xl bg-red-600/20 text-red-400 px-3.5 py-1.5 text-xs font-semibold hover:bg-red-600/30 transition-all"
       >
+        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+        </svg>
         Reject
       </button>
     </div>

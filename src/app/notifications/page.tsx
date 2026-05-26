@@ -18,25 +18,43 @@ export default async function NotificationsPage() {
   } = await supabase.auth.getUser()
   if (!user) redirect("/auth/sign-in")
 
-  const { data: notifications } = await supabase
+  const { data: rawNotifications } = await supabase
     .from("notifications")
-    .select("*, actor:profiles!actor_id(username, full_name)")
+    .select("*")
     .eq("user_id", user.id)
     .order("created_at", { ascending: false })
     .limit(50)
 
-  const unreadCount =
-    notifications?.filter((n) => !n.read).length ?? 0
+  const notifications = rawNotifications ?? []
+
+  const actorIds = [...new Set(notifications.map((n) => n.actor_id))]
+  const { data: actorProfiles } = actorIds.length
+    ? await supabase
+        .from("profiles")
+        .select("id, username, full_name")
+        .in("id", actorIds)
+    : { data: [] }
+
+  const actorMap = new Map(actorProfiles?.map((p) => [p.id, p]) ?? [])
+
+  const unreadCount = notifications.filter((n) => !n.read).length
 
   return (
     <main className="flex-1 mx-auto max-w-2xl w-full px-4 py-8">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Notifications</h1>
+        <div className="flex items-center gap-3">
+          <h1 className="text-xl font-bold">Notifications</h1>
+          {unreadCount > 0 && (
+            <span className="text-[11px] font-medium text-accent bg-accent/10 px-2 py-0.5 rounded-full">
+              {unreadCount} new
+            </span>
+          )}
+        </div>
         {unreadCount > 0 && (
           <form action={markAllNotificationsRead}>
             <button
               type="submit"
-              className="text-sm text-primary hover:underline"
+              className="text-xs font-medium text-primary hover:text-primary-hover transition-colors"
             >
               Mark all as read
             </button>
@@ -44,30 +62,32 @@ export default async function NotificationsPage() {
         )}
       </div>
 
-      {!notifications || notifications.length === 0 ? (
-        <p className="text-center py-16 text-gray-500">No notifications yet.</p>
+      {notifications.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-24 text-gray-500">
+          <div className="text-4xl mb-3">🔔</div>
+          <p className="text-sm">No notifications yet</p>
+        </div>
       ) : (
         <div className="space-y-1">
           {notifications.map((n) => {
-            const actor = n.actor as unknown as {
-              username: string | null
-              full_name: string | null
-            } | null
+            const actor = actorMap.get(n.actor_id)
             const actorName = actor?.full_name || actor?.username || "Someone"
 
             return (
               <form
                 key={n.id}
                 action={markNotificationRead.bind(null, n.id)}
-                className={`block rounded-lg px-4 py-3 transition-colors ${
-                  n.read ? "opacity-50" : "bg-gray-900 border border-gray-800"
+                className={`block rounded-xl px-4 py-3 transition-all hover:bg-white/[0.02] ${
+                  n.read
+                    ? "opacity-40"
+                    : "bg-gradient-to-r from-primary/[0.03] to-transparent border-l-2 border-primary"
                 }`}
               >
                 <button
                   type="submit"
                   className="w-full text-left cursor-pointer"
                 >
-                  <p className="text-sm">
+                  <p className="text-sm leading-relaxed">
                     <span className="font-medium">{actorName}</span>{" "}
                     {notificationLabels[n.type] ?? n.type}
                     {n.type === "new_follower" && (

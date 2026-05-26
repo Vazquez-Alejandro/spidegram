@@ -48,3 +48,32 @@ export async function signOut() {
   revalidatePath("/")
   redirect("/")
 }
+
+export async function updateProfile(formData: FormData) {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) redirect("/auth/sign-in")
+
+  const fullName = formData.get("full_name") as string
+  const username = formData.get("username") as string
+
+  const updates: Record<string, string> = {}
+  if (fullName?.trim()) updates.full_name = fullName.trim()
+  if (username?.trim()) updates.username = username.trim()
+
+  if (Object.keys(updates).length === 0) redirect("/profile/edit")
+
+  const { error } = await supabase
+    .from("profiles")
+    .update(updates)
+    .eq("id", user.id)
+
+  if (error) redirect(`/auth/error?message=${encodeURIComponent(error.message)}`)
+
+  revalidatePath("/profile")
+  revalidatePath(`/profile/${user.id}`)
+  redirect(`/profile/${user.id}`)
+}

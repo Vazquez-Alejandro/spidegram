@@ -141,3 +141,47 @@ export async function toggleReaction(photoId: string) {
 
   revalidatePath(`/photos/${photoId}`)
 }
+
+export async function deletePhoto(photoId: string, groupId: string) {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return
+
+  const { data: photo } = await supabase
+    .from("photos")
+    .select("uploader_id, url, group_id")
+    .eq("id", photoId)
+    .single()
+
+  if (!photo) return
+
+  const { data: membership } = await supabase
+    .from("group_members")
+    .select("role")
+    .eq("group_id", photo.group_id)
+    .eq("user_id", user.id)
+    .single()
+
+  const isOwner = photo.uploader_id === user.id
+  const isGroupAdmin = membership?.role === "admin"
+
+  if (!isOwner && !isGroupAdmin) return
+
+  const { error: dbError } = await supabase
+    .from("photos")
+    .delete()
+    .eq("id", photoId)
+
+  if (dbError) return
+
+  const storagePath = photo.url.split("/photos/").pop()
+  if (storagePath) {
+    await supabase.storage.from("photos").remove([storagePath])
+  }
+
+  revalidatePath(`/groups/${groupId}`)
+  redirect(`/groups/${groupId}`)
+}

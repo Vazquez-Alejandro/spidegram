@@ -5,12 +5,13 @@ export default function SignUpPage() {
     <div className="flex-1 flex items-center justify-center px-4">
       <div className="w-full max-w-sm flex flex-col gap-6">
         <div className="text-center">
+          <div className="text-4xl mb-3">🕷️</div>
           <h1 className="text-2xl font-bold">Create an account</h1>
           <p className="text-gray-400 mt-1">Join Spidegram</p>
         </div>
         <form className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1">
-            <label htmlFor="email" className="text-sm text-gray-400">
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="email" className="text-sm text-gray-400 font-medium">
               Email
             </label>
             <input
@@ -18,11 +19,11 @@ export default function SignUpPage() {
               name="email"
               type="email"
               required
-              className="rounded-lg border border-gray-700 bg-transparent px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+              className="rounded-xl border border-border bg-surface px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all"
             />
           </div>
-          <div className="flex flex-col gap-1">
-            <label htmlFor="password" className="text-sm text-gray-400">
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="password" className="text-sm text-gray-400 font-medium">
               Password
             </label>
             <input
@@ -30,20 +31,20 @@ export default function SignUpPage() {
               name="password"
               type="password"
               required
-              className="rounded-lg border border-gray-700 bg-transparent px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+              className="rounded-xl border border-border bg-surface px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all"
             />
           </div>
           <button
             type="submit"
             formAction={signUp}
-            className="rounded-lg bg-primary px-6 py-3 font-medium hover:bg-primary-hover transition-colors"
+            className="rounded-xl bg-gradient-to-r from-primary to-accent px-6 py-3 font-semibold text-sm hover:opacity-90 transition-all shadow-lg shadow-primary/25"
           >
             Sign up
           </button>
         </form>
         <p className="text-center text-sm text-gray-400">
           Already have an account?{" "}
-          <a href="/auth/sign-in" className="text-primary hover:underline">
+          <a href="/auth/sign-in" className="text-primary hover:text-primary-hover font-medium transition-colors">
             Sign in
           </a>
         </p>

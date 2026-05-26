@@ -30,7 +30,9 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <Navbar />
-        {children}
+        <div className="flex-1 animate-fade-in">
+          {children}
+        </div>
       </body>
     </html>
   )
