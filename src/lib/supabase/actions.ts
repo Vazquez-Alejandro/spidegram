@@ -78,3 +78,39 @@ export async function updateProfile(formData: FormData) {
   revalidatePath(`/profile/${user.id}`)
   redirectWithFlash(`/profile/${user.id}`, "success", "Profile updated!")
 }
+
+export async function resetPasswordRequest(formData: FormData) {
+  const supabase = await createClient()
+
+  const email = formData.get("email") as string
+  if (!email) return
+
+  const origin = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${origin}/auth/callback?next=/auth/reset-password`,
+  })
+
+  if (error) {
+    redirectWithFlash("/auth/forgot-password", "error", error.message)
+  }
+
+  redirectWithFlash("/auth/sign-in", "success", "Check your email for the reset link")
+}
+
+export async function updatePassword(formData: FormData) {
+  const supabase = await createClient()
+
+  const password = formData.get("password") as string
+  if (!password || password.length < 6) {
+    redirectWithFlash("/auth/reset-password", "error", "Password must be at least 6 characters")
+  }
+
+  const { error } = await supabase.auth.updateUser({ password })
+
+  if (error) {
+    redirectWithFlash("/auth/reset-password", "error", error.message)
+  }
+
+  redirectWithFlash("/dashboard", "success", "Password updated successfully!")
+}

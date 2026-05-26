@@ -3,9 +3,11 @@ import { createClient } from "@/lib/supabase/server"
 import { PhotoUpload } from "@/components/photo-upload"
 import { LeaveGroupButton } from "@/components/leave-group-button"
 import { PendingPhotoActions } from "@/components/pending-photo-actions"
-import { PhotoLightbox } from "@/components/photo-lightbox"
 import { MemberManager } from "@/components/member-manager"
 import { GroupEditor } from "@/components/group-editor"
+import { PhotoGrid } from "@/components/photo-grid"
+import { InviteLink } from "@/components/invite-link"
+import { PhotoSearch } from "@/components/photo-search"
 
 export default async function GroupPage(props: {
   params: Promise<{ id: string }>
@@ -173,6 +175,10 @@ export default async function GroupPage(props: {
         <PhotoUpload groupId={id} />
       </section>
 
+      <section className="mb-10">
+        <InviteLink groupId={id} />
+      </section>
+
       {isAdmin && pendingPhotos && pendingPhotos.length > 0 && (
         <section className="mb-10">
           <div className="flex items-center gap-3 mb-4">
@@ -227,38 +233,14 @@ export default async function GroupPage(props: {
           </span>
           <div className="h-px flex-1 bg-border" />
         </div>
-        {!approvedPhotos || approvedPhotos.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-gray-500">
-            <div className="text-4xl mb-3">📷</div>
-            <p className="text-sm">No approved photos yet</p>
-          </div>
-        ) : (
-          <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
-            {approvedPhotos.map((photo) => (
-              <div
-                key={photo.id}
-                className="aspect-square rounded-2xl bg-surface overflow-hidden group relative ring-1 ring-white/5 hover:ring-primary/30 transition-all"
-              >
-                <PhotoLightbox src={photo.url} alt={photo.caption ?? ""}>
-                  <img
-                    src={photo.url}
-                    alt={photo.caption ?? ""}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                  />
-                </PhotoLightbox>
-                <a
-                  href={`/photos/${photo.id}`}
-                  className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity p-3 flex flex-col justify-end"
-                >
-                  {photo.caption && (
-                    <p className="text-sm font-medium truncate drop-shadow-lg">{photo.caption}</p>
-                  )}
-                  <p className="text-[11px] text-gray-300 mt-0.5">View details →</p>
-                </a>
-              </div>
-            ))}
-          </div>
-        )}
+        <div className="mb-4">
+          <PhotoSearch groupId={id} />
+        </div>
+        <PhotoGrid
+          initialPhotos={(approvedPhotos ?? []).slice(0, 12)}
+          groupId={id}
+          pageSize={12}
+        />
       </section>
     </main>
   )

@@ -41,6 +41,12 @@ export default function SignInPage() {
           >
             Sign in
           </button>
+          <a
+            href="/auth/forgot-password"
+            className="text-xs text-gray-500 hover:text-gray-300 transition-colors text-center"
+          >
+            Forgot password?
+          </a>
         </form>
         <p className="text-center text-sm text-gray-400">
           Don&apos;t have an account?{" "}

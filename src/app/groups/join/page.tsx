@@ -1,13 +1,38 @@
 import { redirect } from "next/navigation"
+import { revalidatePath } from "next/cache"
 import { createClient } from "@/lib/supabase/server"
 import { joinGroup } from "@/lib/supabase/groups"
 
-export default async function JoinGroupPage() {
+export default async function JoinGroupPage(props: {
+  searchParams: Promise<{ id?: string }>
+}) {
+  const { id } = await props.searchParams
   const supabase = await createClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
   if (!user) redirect("/auth/sign-in")
+
+  if (id) {
+    const { error } = await supabase.from("group_members").insert({
+      group_id: id,
+      user_id: user.id,
+      role: "member",
+    })
+
+    const { data: group } = await supabase
+      .from("groups")
+      .select("id, name")
+      .eq("id", id)
+      .single()
+
+    if (error || !group) {
+      redirect(`/groups/join?error=${encodeURIComponent("Invalid or expired invite link")}`)
+    }
+
+    revalidatePath("/dashboard")
+    redirect(`/groups/${group.id}`)
+  }
 
   return (
     <main className="flex-1 mx-auto max-w-md w-full px-4 py-12">
