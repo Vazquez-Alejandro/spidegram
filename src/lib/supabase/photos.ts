@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 
 import { createClient } from "@/lib/supabase/server"
+import { redirectWithFlash } from "@/lib/flash"
 
 export async function uploadPhoto(formData: FormData) {
   const supabase = await createClient()
@@ -94,6 +95,50 @@ export async function rejectPhoto(photoId: string, groupId?: string) {
   if (groupId) revalidatePath(`/groups/${groupId}`)
 }
 
+export async function deletePhoto(photoId: string, groupId: string) {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return
+
+  const { data: photo } = await supabase
+    .from("photos")
+    .select("uploader_id, url, group_id")
+    .eq("id", photoId)
+    .single()
+
+  if (!photo) return
+
+  const { data: membership } = await supabase
+    .from("group_members")
+    .select("role")
+    .eq("group_id", photo.group_id)
+    .eq("user_id", user.id)
+    .single()
+
+  const isOwner = photo.uploader_id === user.id
+  const isGroupAdmin = membership?.role === "admin"
+
+  if (!isOwner && !isGroupAdmin) return
+
+  const { error: dbError } = await supabase
+    .from("photos")
+    .delete()
+    .eq("id", photoId)
+
+  if (dbError) return
+
+  const storagePath = photo.url.split("/photos/").pop()
+  if (storagePath) {
+    await supabase.storage.from("photos").remove([storagePath])
+  }
+
+  revalidatePath(`/groups/${groupId}`)
+  redirectWithFlash(`/groups/${groupId}`, "success", "Photo deleted")
+}
+
 export async function addComment(photoId: string, formData: FormData) {
   const supabase = await createClient()
 
@@ -140,48 +185,4 @@ export async function toggleReaction(photoId: string) {
   }
 
   revalidatePath(`/photos/${photoId}`)
-}
-
-export async function deletePhoto(photoId: string, groupId: string) {
-  const supabase = await createClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) return
-
-  const { data: photo } = await supabase
-    .from("photos")
-    .select("uploader_id, url, group_id")
-    .eq("id", photoId)
-    .single()
-
-  if (!photo) return
-
-  const { data: membership } = await supabase
-    .from("group_members")
-    .select("role")
-    .eq("group_id", photo.group_id)
-    .eq("user_id", user.id)
-    .single()
-
-  const isOwner = photo.uploader_id === user.id
-  const isGroupAdmin = membership?.role === "admin"
-
-  if (!isOwner && !isGroupAdmin) return
-
-  const { error: dbError } = await supabase
-    .from("photos")
-    .delete()
-    .eq("id", photoId)
-
-  if (dbError) return
-
-  const storagePath = photo.url.split("/photos/").pop()
-  if (storagePath) {
-    await supabase.storage.from("photos").remove([storagePath])
-  }
-
-  revalidatePath(`/groups/${groupId}`)
-  redirect(`/groups/${groupId}`)
 }

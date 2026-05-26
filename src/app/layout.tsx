@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 import { Navbar } from "@/components/navbar"
+import { Toast } from "@/components/toast"
 import "./globals.css"
 
 const geistSans = Geist({
@@ -33,6 +34,7 @@ export default function RootLayout({
         <div className="flex-1 animate-fade-in">
           {children}
         </div>
+        <Toast />
       </body>
     </html>
   )

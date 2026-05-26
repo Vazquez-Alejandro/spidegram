@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 
 import { createClient } from "@/lib/supabase/server"
+import { redirectWithFlash } from "@/lib/flash"
 
 export async function followUser(formData: FormData) {
   const supabase = await createClient()

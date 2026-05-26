@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 
 import { createClient } from "@/lib/supabase/server"
+import { redirectWithFlash } from "@/lib/flash"
 
 export async function createGroup(formData: FormData) {
   const supabase = await createClient()
@@ -33,7 +34,7 @@ export async function createGroup(formData: FormData) {
   if (memberError) redirect(`/auth/error?message=${encodeURIComponent(memberError.message)}`)
 
   revalidatePath("/dashboard")
-  redirect(`/groups/${group.id}`)
+  redirectWithFlash(`/groups/${group.id}`, "success", "Group created!")
 }
 
 export async function joinGroup(formData: FormData) {
@@ -52,11 +53,11 @@ export async function joinGroup(formData: FormData) {
     role: "member",
   })
 
-  if (error) redirect(`/auth/error?message=${encodeURIComponent(error.message)}`)
+  if (error) redirectWithFlash(`/groups/join`, "error", error.message)
 
   revalidatePath("/dashboard")
   revalidatePath(`/groups/${groupId}`)
-  redirect(`/groups/${groupId}`)
+  redirectWithFlash(`/groups/${groupId}`, "success", "Joined the group!")
 }
 
 export async function leaveGroup(formData: FormData) {
@@ -76,7 +77,7 @@ export async function leaveGroup(formData: FormData) {
     .eq("user_id", user.id)
 
   revalidatePath("/dashboard")
-  redirect("/dashboard")
+  redirectWithFlash("/dashboard", "success", "Left the group")
 }
 
 export async function updateGroup(formData: FormData) {
@@ -179,4 +180,30 @@ export async function transferOwnership(formData: FormData) {
     .eq("user_id", newAdminId)
 
   revalidatePath(`/groups/${groupId}`)
+}
+
+export async function deleteGroup(formData: FormData) {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return { error: "Not authenticated" }
+
+  const groupId = formData.get("groupId") as string
+
+  const { data: adminCheck } = await supabase
+    .from("group_members")
+    .select("id")
+    .eq("group_id", groupId)
+    .eq("user_id", user.id)
+    .eq("role", "admin")
+    .single()
+
+  if (!adminCheck) return { error: "Not authorized" }
+
+  const { error } = await supabase.from("groups").delete().eq("id", groupId)
+  if (error) return { error: error.message }
+
+  revalidatePath("/dashboard")
 }

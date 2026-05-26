@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 
 import { createClient } from "@/lib/supabase/server"
+import { redirectWithFlash } from "@/lib/flash"
 
 export async function signUp(formData: FormData) {
   const supabase = await createClient()
@@ -16,11 +17,11 @@ export async function signUp(formData: FormData) {
   const { error } = await supabase.auth.signUp(data)
 
   if (error) {
-    redirect(`/auth/error?message=${encodeURIComponent(error.message)}`)
+    redirectWithFlash("/auth/sign-up", "error", error.message)
   }
 
   revalidatePath("/")
-  redirect("/")
+  redirectWithFlash("/", "success", "Check your email to confirm your account")
 }
 
 export async function signIn(formData: FormData) {
@@ -34,11 +35,11 @@ export async function signIn(formData: FormData) {
   const { error } = await supabase.auth.signInWithPassword(data)
 
   if (error) {
-    redirect(`/auth/error?message=${encodeURIComponent(error.message)}`)
+    redirectWithFlash("/auth/sign-in", "error", error.message)
   }
 
   revalidatePath("/")
-  redirect("/")
+  redirectWithFlash("/dashboard", "success", "Welcome back!")
 }
 
 export async function signOut() {
@@ -46,7 +47,7 @@ export async function signOut() {
   await supabase.auth.signOut()
 
   revalidatePath("/")
-  redirect("/")
+  redirectWithFlash("/", "success", "Signed out")
 }
 
 export async function updateProfile(formData: FormData) {
@@ -71,9 +72,9 @@ export async function updateProfile(formData: FormData) {
     .update(updates)
     .eq("id", user.id)
 
-  if (error) redirect(`/auth/error?message=${encodeURIComponent(error.message)}`)
+  if (error) redirectWithFlash("/profile/edit", "error", error.message)
 
   revalidatePath("/profile")
   revalidatePath(`/profile/${user.id}`)
-  redirect(`/profile/${user.id}`)
+  redirectWithFlash(`/profile/${user.id}`, "success", "Profile updated!")
 }

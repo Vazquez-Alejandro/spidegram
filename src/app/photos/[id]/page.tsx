@@ -109,14 +109,12 @@ export default async function PhotoPage(props: {
               </button>
             </form>
             {canDelete && (
-              <form
-                action={deletePhoto.bind(null, photo.id, photo.group_id)}
-                onSubmit={(e) => {
-                  if (!confirm("Delete this photo permanently?")) e.preventDefault()
-                }}
-              >
+              <form action={deletePhoto.bind(null, photo.id, photo.group_id)}>
                 <button
                   type="submit"
+                  onClick={(e) => {
+                    if (!confirm("Delete this photo permanently?")) e.preventDefault()
+                  }}
                   className="flex items-center gap-1.5 text-sm transition-all rounded-xl px-3 py-1.5 text-red-400 hover:bg-red-950/30"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -1,8 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import { updateGroup } from "@/lib/supabase/groups"
 import { useRouter } from "next/navigation"
+import { updateGroup, deleteGroup } from "@/lib/supabase/groups"
+import { ConfirmModal } from "./confirm-modal"
 
 export function GroupEditor({
   groupId,
@@ -17,6 +18,8 @@ export function GroupEditor({
   const [name, setName] = useState(initialName)
   const [description, setDescription] = useState(initialDescription ?? "")
   const [error, setError] = useState<string | null>(null)
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const router = useRouter()
 
   async function handleSubmit(e: React.FormEvent) {
@@ -36,6 +39,16 @@ export function GroupEditor({
 
     setOpen(false)
     router.refresh()
+  }
+
+  async function handleDelete() {
+    setConfirmDelete(false)
+    setDeleting(true)
+    const fd = new FormData()
+    fd.set("groupId", groupId)
+    const result = await deleteGroup(fd)
+    if (result?.error) return
+    router.push("/dashboard")
   }
 
   return (
@@ -91,9 +104,27 @@ export function GroupEditor({
                 Save
               </button>
             </form>
+            <div className="mt-6 pt-4 border-t border-border">
+              <button
+                onClick={() => setConfirmDelete(true)}
+                disabled={deleting}
+                className="text-sm text-red-400 hover:text-red-300 transition-colors disabled:opacity-50"
+              >
+                {deleting ? "Deleting..." : "Delete group permanently"}
+              </button>
+            </div>
           </div>
         </div>
       )}
+      <ConfirmModal
+        open={confirmDelete}
+        onConfirm={handleDelete}
+        onCancel={() => setConfirmDelete(false)}
+        title="Delete group?"
+        message="This will permanently delete the group and all its photos. This action cannot be undone."
+        confirmLabel="Delete group"
+        variant="danger"
+      />
     </>
   )
 }
