@@ -2,12 +2,13 @@ import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { PhotoUpload } from "@/components/photo-upload"
 import { LeaveGroupButton } from "@/components/leave-group-button"
-import { PendingPhotoActions } from "@/components/pending-photo-actions"
 import { MemberManager } from "@/components/member-manager"
 import { GroupEditor } from "@/components/group-editor"
 import { PhotoGrid } from "@/components/photo-grid"
 import { InviteLink } from "@/components/invite-link"
 import { PhotoSearch } from "@/components/photo-search"
+import { BulkActions } from "@/components/bulk-actions"
+import { ActivityFeed } from "@/components/activity-feed"
 
 export default async function GroupPage(props: {
   params: Promise<{ id: string }>
@@ -190,40 +191,29 @@ export default async function GroupPage(props: {
             </span>
             <div className="h-px flex-1 bg-border" />
           </div>
-          <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
-            {pendingPhotos.map((photo) => (
-              <div
-                key={photo.id}
-                className="rounded-2xl bg-surface overflow-hidden border border-amber-900/40 hover:border-amber-700/50 transition-colors"
-              >
-                <div className="aspect-square relative">
-                  <img
-                    src={photo.url}
-                    alt={photo.caption ?? ""}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute top-2 left-2">
-                    <span className="text-[10px] font-medium bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded-full backdrop-blur-sm">
-                      Pending
-                    </span>
-                  </div>
-                </div>
-                <div className="p-3 space-y-2">
-                  {photo.caption && (
-                    <p className="text-xs text-gray-400 truncate">{photo.caption}</p>
-                  )}
-                  <p className="text-[11px] text-gray-500">
-                    by {uploaderMap.get(photo.uploader_id)?.username ||
-                      uploaderMap.get(photo.uploader_id)?.full_name ||
-                      "Unknown"}
-                  </p>
-                  <PendingPhotoActions photoId={photo.id} groupId={id} />
-                </div>
-              </div>
-            ))}
-          </div>
+          <BulkActions
+            groupId={id}
+            photos={pendingPhotos.map((p) => ({
+              id: p.id,
+              url: p.url,
+              caption: p.caption,
+              uploader_id: p.uploader_id,
+              uploader_name:
+                uploaderMap.get(p.uploader_id)?.username ||
+                uploaderMap.get(p.uploader_id)?.full_name ||
+                "Unknown",
+            }))}
+          />
         </section>
       )}
+
+      <section className="mb-10">
+        <div className="flex items-center gap-3 mb-4">
+          <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Recent Activity</h2>
+          <div className="h-px flex-1 bg-border" />
+        </div>
+        <ActivityFeed groupId={id} />
+      </section>
 
       <section>
         <div className="flex items-center gap-3 mb-4">

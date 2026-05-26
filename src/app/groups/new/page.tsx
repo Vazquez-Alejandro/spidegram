@@ -39,6 +39,24 @@ export default async function NewGroupPage() {
               className="rounded-xl border border-border bg-surface px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all resize-none"
             />
           </div>
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="cover" className="text-sm text-gray-400 font-medium">Cover photo (optional)</label>
+            <input
+              id="cover"
+              name="cover"
+              type="file"
+              accept="image/*"
+              className="rounded-xl border border-border bg-surface px-4 py-2.5 text-sm file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-medium file:bg-primary/20 file:text-primary hover:file:bg-primary/30 transition-all cursor-pointer"
+            />
+          </div>
+          <label className="flex items-center gap-2.5 text-sm text-gray-400 cursor-pointer hover:text-gray-300 transition-colors">
+            <input
+              type="checkbox"
+              name="is_public"
+              className="rounded border-border bg-surface text-primary focus:ring-primary/50"
+            />
+            Make group public (anyone can find and join)
+          </label>
           <button
             type="submit"
             formAction={createGroup}

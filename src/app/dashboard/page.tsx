@@ -1,8 +1,12 @@
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { resendVerification } from "@/lib/supabase/actions"
+import { DashboardClient } from "@/components/dashboard-client"
 
-export default async function DashboardPage() {
+export default async function DashboardPage(props: {
+  searchParams: Promise<{ q?: string }>
+}) {
+  const { q } = await props.searchParams
   const supabase = await createClient()
 
   const {
@@ -16,7 +20,8 @@ export default async function DashboardPage() {
     .eq("user_id", user.id) as unknown as {
     data: { group_id: string; role: string; groups: {
       id: string; name: string; description: string | null;
-      cover_url: string | null; created_by: string;
+      cover_url: string | null; is_public: boolean;
+      created_by: string;
       created_at: string; updated_at: string;
     } }[] | null
   }
@@ -25,6 +30,13 @@ export default async function DashboardPage() {
     ...m.groups,
     role: m.role,
   })) ?? []
+
+  const filtered = q
+    ? groups.filter((g) =>
+        g.name.toLowerCase().includes(q.toLowerCase()) ||
+        g.description?.toLowerCase().includes(q.toLowerCase()),
+      )
+    : groups
 
   const emailNotConfirmed = !user.email_confirmed_at
 
@@ -70,40 +82,31 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {groups.length === 0 ? (
+      <div className="relative mb-6">
+        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        <input
+          name="q"
+          type="text"
+          defaultValue={q ?? ""}
+          placeholder="Search groups by name..."
+          form="searchForm"
+          className="w-full rounded-xl border border-border bg-surface pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all"
+        />
+      </div>
+      <form id="searchForm" action="/dashboard" className="hidden">
+        <input type="hidden" name="q" value={q ?? ""} />
+      </form>
+
+      {filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-24 text-gray-500">
           <div className="text-5xl mb-4">📸</div>
-          <p className="text-lg font-medium">No groups yet</p>
-          <p className="mt-1 text-sm">Create a new group or join an existing one.</p>
+          <p className="text-lg font-medium">{q ? "No groups match your search" : "No groups yet"}</p>
+          <p className="mt-1 text-sm">{q ? "Try a different search term." : "Create a new group or join an existing one."}</p>
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {groups.map((group, i) => (
-            <a
-              key={group.id}
-              href={`/groups/${group.id}`}
-              className="group rounded-2xl border border-border bg-surface hover:border-primary/30 hover:bg-surface/80 transition-all hover:shadow-lg hover:shadow-primary/5"
-              style={{ animationDelay: `${i * 50}ms` }}
-            >
-              <div className="h-32 rounded-t-2xl bg-gradient-to-br from-primary/20 via-accent/10 to-surface flex items-center justify-center">
-                <span className="text-4xl opacity-50 group-hover:opacity-75 transition-opacity">
-                  🕸️
-                </span>
-              </div>
-              <div className="p-4">
-                <div className="flex items-start justify-between mb-2">
-                  <h2 className="font-semibold text-base truncate">{group.name}</h2>
-                  <span className="shrink-0 text-[11px] font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-full capitalize ml-2">
-                    {group.role === "admin" ? "👑 " : ""}{group.role}
-                  </span>
-                </div>
-                {group.description && (
-                  <p className="text-sm text-gray-500 line-clamp-2 leading-relaxed">{group.description}</p>
-                )}
-              </div>
-            </a>
-          ))}
-        </div>
+        <DashboardClient groups={filtered as any} />
       )}
     </main>
   )

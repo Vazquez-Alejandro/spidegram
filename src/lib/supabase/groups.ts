@@ -16,10 +16,27 @@ export async function createGroup(formData: FormData) {
 
   const name = formData.get("name") as string
   const description = formData.get("description") as string
+  const isPublic = formData.get("is_public") === "on"
+  const cover = formData.get("cover") as File
+
+  let cover_url: string | null = null
+  if (cover && cover.size > 0) {
+    const ext = cover.name.split(".").pop()
+    const coverPath = `covers/${crypto.randomUUID()}.${ext}`
+
+    const { error: uploadError } = await supabase.storage
+      .from("photos")
+      .upload(coverPath, cover)
+
+    if (!uploadError) {
+      const { data: { publicUrl } } = supabase.storage.from("photos").getPublicUrl(coverPath)
+      cover_url = publicUrl
+    }
+  }
 
   const { data: group, error } = await supabase
     .from("groups")
-    .insert({ name, description, created_by: user.id })
+    .insert({ name, description, created_by: user.id, is_public: isPublic, cover_url })
     .select()
     .single()
 

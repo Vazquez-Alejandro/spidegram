@@ -2,6 +2,7 @@ import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { addComment, toggleReaction, deletePhoto } from "@/lib/supabase/photos"
 import { EditCaption } from "@/components/edit-caption"
+import { SharePhoto } from "@/components/share-photo"
 
 export default async function PhotoPage(props: {
   params: Promise<{ id: string }>
@@ -111,6 +112,7 @@ export default async function PhotoPage(props: {
                 {reactions?.length ?? 0} {reactions?.length === 1 ? "like" : "likes"}
               </button>
             </form>
+            <SharePhoto photoId={photo.id} />
             {canDelete && (
               <form action={deletePhoto.bind(null, photo.id, photo.group_id)}>
                 <button
