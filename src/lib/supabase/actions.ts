@@ -79,6 +79,69 @@ export async function updateProfile(formData: FormData) {
   redirectWithFlash(`/profile/${user.id}`, "success", "Profile updated!")
 }
 
+export async function updateAvatar(formData: FormData) {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) redirect("/auth/sign-in")
+
+  const file = formData.get("avatar") as File
+  if (!file || file.size === 0) {
+    redirectWithFlash("/profile/edit", "error", "No file selected")
+  }
+
+  const ext = file.name.split(".").pop()
+  const filePath = `avatars/${user.id}.${ext}`
+
+  const { error: uploadError } = await supabase.storage
+    .from("photos")
+    .upload(filePath, file, { upsert: true })
+
+  if (uploadError) {
+    redirectWithFlash("/profile/edit", "error", uploadError.message)
+  }
+
+  const {
+    data: { publicUrl },
+  } = supabase.storage.from("photos").getPublicUrl(filePath)
+
+  const { error: dbError } = await supabase
+    .from("profiles")
+    .update({ avatar_url: publicUrl })
+    .eq("id", user.id)
+
+  if (dbError) {
+    redirectWithFlash("/profile/edit", "error", dbError.message)
+  }
+
+  revalidatePath("/profile")
+  revalidatePath(`/profile/${user.id}`)
+  revalidatePath("/profile/edit")
+  redirectWithFlash("/profile/edit", "success", "Avatar updated!")
+}
+
+export async function resendVerification(formData: FormData) {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return
+
+  const { error } = await supabase.auth.resend({
+    type: "signup",
+    email: user.email!,
+  })
+
+  if (error) {
+    redirectWithFlash("/dashboard", "error", error.message)
+  }
+
+  redirectWithFlash("/dashboard", "success", "Verification email sent!")
+}
+
 export async function resetPasswordRequest(formData: FormData) {
   const supabase = await createClient()
 

@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
+import { resendVerification } from "@/lib/supabase/actions"
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -25,8 +26,29 @@ export default async function DashboardPage() {
     role: m.role,
   })) ?? []
 
+  const emailNotConfirmed = !user.email_confirmed_at
+
   return (
     <main className="flex-1 mx-auto max-w-6xl w-full px-4 py-8">
+      {emailNotConfirmed && (
+        <div className="mb-6 rounded-xl bg-amber-900/40 border border-amber-800/50 px-4 py-3 text-sm text-amber-300 flex items-center justify-between gap-4 animate-scale-in">
+          <div className="flex items-center gap-2">
+            <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+            <span>Please confirm your email address to enable all features.</span>
+          </div>
+          <form>
+            <button
+              type="submit"
+              formAction={resendVerification}
+              className="shrink-0 rounded-lg bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 px-3 py-1.5 text-xs font-medium transition-colors"
+            >
+              Resend
+            </button>
+          </form>
+        </div>
+      )}
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold">My Groups</h1>

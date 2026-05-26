@@ -160,6 +160,33 @@ export async function addComment(photoId: string, formData: FormData) {
   revalidatePath("/groups/[id]", "layout")
 }
 
+export async function updateCaption(photoId: string, groupId: string, formData: FormData) {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return
+
+  const caption = formData.get("caption") as string
+
+  const { data: photo } = await supabase
+    .from("photos")
+    .select("uploader_id")
+    .eq("id", photoId)
+    .single()
+
+  if (!photo || photo.uploader_id !== user.id) return
+
+  await supabase
+    .from("photos")
+    .update({ caption: caption || null })
+    .eq("id", photoId)
+
+  revalidatePath(`/photos/${photoId}`)
+  revalidatePath(`/groups/${groupId}`)
+}
+
 export async function toggleReaction(photoId: string) {
   const supabase = await createClient()
 

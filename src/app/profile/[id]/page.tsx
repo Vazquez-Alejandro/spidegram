@@ -79,9 +79,13 @@ export default async function ProfilePage(props: {
   return (
     <main className="flex-1 mx-auto max-w-2xl w-full px-4 py-8">
       <div className="flex flex-col items-center text-center mb-8">
-        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-2xl font-bold mb-4">
-          {profile.full_name?.charAt(0) || profile.username?.charAt(0) || "?"}
-        </div>
+        {profile.avatar_url ? (
+          <img src={profile.avatar_url} alt="" className="w-20 h-20 rounded-full object-cover ring-2 ring-border mb-4" />
+        ) : (
+          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-2xl font-bold mb-4">
+            {profile.full_name?.charAt(0) || profile.username?.charAt(0) || "?"}
+          </div>
+        )}
         <h1 className="text-2xl font-bold">
           {profile.full_name || profile.username || "Anonymous"}
         </h1>

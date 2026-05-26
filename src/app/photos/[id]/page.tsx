@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { addComment, toggleReaction, deletePhoto } from "@/lib/supabase/photos"
+import { EditCaption } from "@/components/edit-caption"
 
 export default async function PhotoPage(props: {
   params: Promise<{ id: string }>
@@ -88,9 +89,11 @@ export default async function PhotoPage(props: {
         </div>
 
         <div className="md:col-span-2 flex flex-col gap-5 mt-4 md:mt-0">
-          {photo.caption && (
+          {photo.uploader_id === user.id ? (
+            <EditCaption photoId={photo.id} groupId={photo.group_id} initialCaption={photo.caption} />
+          ) : photo.caption ? (
             <p className="text-base leading-relaxed">{photo.caption}</p>
-          )}
+          ) : null}
 
           <div className="flex items-center gap-4">
             <form action={toggleReaction.bind(null, photo.id)}>
