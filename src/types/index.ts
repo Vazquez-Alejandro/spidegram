@@ -93,6 +93,25 @@ export type NotificationType =
   | "new_comment"
   | "new_follower"
 
+export interface Story {
+  id: string
+  user_id: string
+  group_id: string
+  media_url: string
+  media_type: "photo" | "video"
+  caption: string | null
+  created_at: string
+  expires_at: string
+  viewed?: boolean
+}
+
+export interface StoryView {
+  id: string
+  story_id: string
+  user_id: string
+  viewed_at: string
+}
+
 export interface Notification {
   id: string
   user_id: string

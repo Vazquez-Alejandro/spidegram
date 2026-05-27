@@ -12,6 +12,7 @@ import { BulkActions } from "@/components/bulk-actions"
 import { ActivityFeed } from "@/components/activity-feed"
 import { AlbumTabs, CreateAlbumForm } from "@/components/album-tabs"
 import { GroupAnalytics } from "@/components/group-analytics"
+import { StoryRings } from "@/components/story-rings"
 
 export async function generateMetadata(props: {
   params: Promise<{ id: string }>
@@ -198,6 +199,10 @@ export default async function GroupPage(props: {
           <LeaveGroupButton groupId={id} />
         </div>
       </div>
+
+      <section className="mb-8">
+        <StoryRings groupId={id} userId={user.id} />
+      </section>
 
       <section className="mb-10">
         <div className="flex items-center gap-3 mb-4">
