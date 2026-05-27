@@ -122,3 +122,14 @@ export interface Notification {
   read: boolean
   created_at: string
 }
+
+export interface Report {
+  id: string
+  photo_id: string
+  reporter_id: string
+  reason: string
+  created_at: string
+  resolved_at: string | null
+  resolved_by: string | null
+  resolution: "kept" | "dismissed" | null
+}

@@ -5,6 +5,7 @@ import { toggleReaction, deletePhoto } from "@/lib/supabase/photos"
 import { EditCaption } from "@/components/edit-caption"
 import { SharePhoto } from "@/components/share-photo"
 import { RealtimeComments } from "@/components/realtime-comments"
+import { ReportButton } from "@/components/report-button"
 
 export async function generateMetadata(props: {
   params: Promise<{ id: string }>
@@ -205,6 +206,7 @@ export default async function PhotoPage(props: {
                 </button>
               </form>
             )}
+            <ReportButton photoId={photo.id} />
           </div>
 
           <RealtimeComments

@@ -13,6 +13,7 @@ import { ActivityFeed } from "@/components/activity-feed"
 import { AlbumTabs, CreateAlbumForm } from "@/components/album-tabs"
 import { GroupAnalytics } from "@/components/group-analytics"
 import { StoryRings } from "@/components/story-rings"
+import { ReportsPanel } from "@/components/reports-panel"
 
 export async function generateMetadata(props: {
   params: Promise<{ id: string }>
@@ -308,6 +309,8 @@ export default async function GroupPage(props: {
           />
         </section>
       )}
+
+      {isAdmin && <ReportsPanel groupId={id} />}
 
       <section className="mb-10">
         <div className="flex items-center gap-3 mb-4">
