@@ -1,8 +1,23 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
+import { createClient } from "@/lib/supabase/client"
 
 export function PhotoUpload({ groupId }: { groupId: string }) {
+  const [albums, setAlbums] = useState<{ id: string; name: string }[]>([])
+  const [selectedAlbum, setSelectedAlbum] = useState("")
+
+  useEffect(() => {
+    const supabase = createClient()
+    supabase
+      .from("albums")
+      .select("id, name")
+      .eq("group_id", groupId)
+      .order("name")
+      .then(({ data }) => {
+        if (data) setAlbums(data)
+      })
+  }, [groupId])
   const [previews, setPreviews] = useState<string[]>([])
   const [files, setFiles] = useState<File[]>([])
   const [error, setError] = useState<string | null>(null)
@@ -47,6 +62,7 @@ export function PhotoUpload({ groupId }: { groupId: string }) {
       formData.append("file", file)
       if (caption) formData.append("caption", caption)
       if (isPublic) formData.append("is_public", "on")
+      if (selectedAlbum) formData.append("albumId", selectedAlbum)
 
       const res = await fetch("/api/upload", { method: "POST", body: formData })
       const data = await res.json()
@@ -117,6 +133,20 @@ export function PhotoUpload({ groupId }: { groupId: string }) {
             <span className="text-sm font-medium">Choose photos to upload</span>
             <span className="text-xs text-gray-500">JPEG, PNG, WebP · up to 10MB each</span>
           </label>
+        )}
+
+        {albums.length > 0 && (
+          <select
+            name="albumId"
+            value={selectedAlbum}
+            onChange={(e) => setSelectedAlbum(e.target.value)}
+            className="w-full max-w-md rounded-xl border border-border bg-surface px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all"
+          >
+            <option value="">No album</option>
+            {albums.map((a) => (
+              <option key={a.id} value={a.id}>{a.name}</option>
+            ))}
+          </select>
         )}
 
         <input

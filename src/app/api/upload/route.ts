@@ -16,6 +16,7 @@ export async function POST(request: Request) {
   const file = formData.get("file") as File
   const caption = formData.get("caption") as string
   const isPublic = formData.get("is_public") === "on"
+  const albumId = formData.get("albumId") as string | null
 
   if (!file || file.size === 0) {
     return NextResponse.json({ error: "No file selected" }, { status: 400 })
@@ -47,6 +48,7 @@ export async function POST(request: Request) {
 
   const { error: dbError } = await supabase.from("photos").insert({
     group_id: groupId,
+    album_id: albumId || null,
     uploader_id: user.id,
     url: publicUrl,
     caption: caption || null,

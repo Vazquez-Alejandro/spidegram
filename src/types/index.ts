@@ -36,9 +36,21 @@ export interface GroupWithMemberCount extends Group {
   role: GroupRole
 }
 
+export interface Album {
+  id: string
+  group_id: string
+  name: string
+  description: string | null
+  cover_url: string | null
+  created_by: string
+  created_at: string
+  updated_at: string
+}
+
 export interface Photo {
   id: string
   group_id: string
+  album_id: string | null
   uploader_id: string
   url: string
   thumbnail_url: string | null

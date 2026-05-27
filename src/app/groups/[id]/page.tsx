@@ -10,6 +10,7 @@ import { InviteLink } from "@/components/invite-link"
 import { PhotoSearch } from "@/components/photo-search"
 import { BulkActions } from "@/components/bulk-actions"
 import { ActivityFeed } from "@/components/activity-feed"
+import { AlbumTabs, CreateAlbumForm } from "@/components/album-tabs"
 
 export async function generateMetadata(props: {
   params: Promise<{ id: string }>
@@ -29,10 +30,10 @@ export async function generateMetadata(props: {
 
 export default async function GroupPage(props: {
   params: Promise<{ id: string }>
-  searchParams: Promise<{ error?: string }>
+  searchParams: Promise<{ error?: string; album?: string }>
 }) {
   const { id } = await props.params
-  const { error: uploadError } = await props.searchParams
+  const { error: uploadError, album: activeAlbum } = await props.searchParams
   const supabase = await createClient()
 
   const {
@@ -97,6 +98,32 @@ export default async function GroupPage(props: {
     .eq("group_id", id)
     .eq("status", "approved")
     .order("created_at", { ascending: false })
+
+  const { data: albums } = await supabase
+    .from("albums")
+    .select("id, name, description, cover_url, created_by, created_at, updated_at")
+    .eq("group_id", id)
+    .order("name")
+
+  const { data: photoCounts } = albums?.length
+    ? await supabase
+        .from("photos")
+        .select("album_id")
+        .eq("group_id", id)
+        .eq("status", "approved")
+        .in("album_id", albums.map((a) => a.id))
+    : { data: [] }
+
+  const albumPhotoCounts: Record<string, number> = {}
+  for (const p of photoCounts ?? []) {
+    if (p.album_id) {
+      albumPhotoCounts[p.album_id] = (albumPhotoCounts[p.album_id] ?? 0) + 1
+    }
+  }
+
+  const filteredPhotos = activeAlbum
+    ? approvedPhotos?.filter((p) => p.album_id === activeAlbum) ?? []
+    : approvedPhotos ?? []
 
   return (
     <main className="flex-1 mx-auto max-w-6xl w-full px-4 py-8">
@@ -252,9 +279,34 @@ export default async function GroupPage(props: {
         <div className="mb-4">
           <PhotoSearch groupId={id} />
         </div>
+        <AlbumTabs
+          albums={(albums ?? []).map((a) => ({
+            id: a.id,
+            name: a.name,
+            photo_count: albumPhotoCounts[a.id] ?? 0,
+          }))}
+          activeAlbum={activeAlbum ?? null}
+          onSelect={(albumId) => {
+            const params = new URLSearchParams()
+            if (albumId) params.set("album", albumId)
+            const qs = params.toString()
+            window.location.href = `/groups/${id}${qs ? `?${qs}` : ""}`
+          }}
+          onCreate={() => {
+            const form = document.getElementById("create-album-form")
+            if (form) form.classList.toggle("hidden")
+          }}
+        />
+        <div id="create-album-form" className="hidden mb-4">
+          <CreateAlbumForm
+            groupId={id}
+            onDone={() => window.location.reload()}
+          />
+        </div>
         <PhotoGrid
-          initialPhotos={(approvedPhotos ?? []).slice(0, 12)}
+          initialPhotos={(filteredPhotos ?? []).slice(0, 12)}
           groupId={id}
+          albumId={activeAlbum ?? null}
           pageSize={12}
           isAdmin={isAdmin}
           currentCover={group.cover_url}

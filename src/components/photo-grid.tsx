@@ -14,12 +14,14 @@ type Photo = {
 export function PhotoGrid({
   initialPhotos,
   groupId,
+  albumId = null,
   pageSize = 12,
   isAdmin = false,
   currentCover,
 }: {
   initialPhotos: Photo[]
   groupId: string
+  albumId?: string | null
   pageSize?: number
   isAdmin?: boolean
   currentCover?: string | null
@@ -39,11 +41,17 @@ export function PhotoGrid({
         const from = photos.length
         const to = from + pageSize - 1
 
-        const { data } = await supabase
+        let query = supabase
           .from("photos")
           .select("id, url, caption, created_at")
           .eq("group_id", groupId)
           .eq("status", "approved")
+
+        if (albumId) {
+          query = query.eq("album_id", albumId)
+        }
+
+        const { data } = await query
           .order("created_at", { ascending: false })
           .range(from, to)
 
@@ -61,7 +69,7 @@ export function PhotoGrid({
     const el = loaderRef.current
     if (el) observer.observe(el)
     return () => { if (el) observer.unobserve(el) }
-  }, [photos.length, loading, hasMore, groupId, pageSize])
+  }, [photos.length, loading, hasMore, groupId, albumId, pageSize])
 
   async function handleSetCover(photoUrl: string) {
     try {
