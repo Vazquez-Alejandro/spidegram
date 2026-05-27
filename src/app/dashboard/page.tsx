@@ -3,6 +3,7 @@ import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { resendVerification } from "@/lib/supabase/actions"
 import { DashboardClient } from "@/components/dashboard-client"
+import { NotificationPrompt } from "@/components/notification-prompt"
 
 export const metadata: Metadata = {
   title: "My Groups — Spidegram",
@@ -85,6 +86,10 @@ export default async function DashboardPage(props: {
             Join Group
           </a>
         </div>
+      </div>
+
+      <div className="mb-6">
+        <NotificationPrompt />
       </div>
 
       <div className="relative mb-6">

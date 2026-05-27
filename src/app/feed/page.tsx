@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { FeedClient } from "@/components/feed-client"
+import { NotificationPrompt } from "@/components/notification-prompt"
 
 export const metadata: Metadata = {
   title: "Feed — Spidegram",
@@ -85,5 +86,12 @@ export default async function FeedPage() {
     groupMap: Map<string, { id: string; name: string }>
   }
 
-  return <FeedClient data={data} />
+  return (
+    <main className="flex-1 mx-auto max-w-2xl w-full px-4 py-8">
+      <div className="mb-6">
+        <NotificationPrompt />
+      </div>
+      <FeedClient data={data} />
+    </main>
+  )
 }
