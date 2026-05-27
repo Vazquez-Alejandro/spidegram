@@ -32,6 +32,13 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - Components in `src/components/`
 - Run `npm run build` to verify before committing
 
+## Testing
+- Unit tests: `npm test` (vitest). Tests in `src/__tests__/`
+- E2E tests: `npm run test:e2e` (Playwright). Tests in `e2e/`
+- Mock `next/navigation` and `next/cache` for Server Action tests
+- Use `createClient` mock from `@/lib/supabase/server` for DB tests
+- Run `npm test` before committing
+
 ## Progress — MVP v0.1
 
 - [x] Auth completo — registro, login, logout

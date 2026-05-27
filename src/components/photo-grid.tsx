@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { PhotoLightbox } from "./photo-lightbox"
-import { useRouter } from "next/navigation"
 
 type Photo = {
   id: string
@@ -29,7 +28,6 @@ export function PhotoGrid({
   const [loading, setLoading] = useState(false)
   const [hasMore, setHasMore] = useState(true)
   const loaderRef = useRef<HTMLDivElement>(null)
-  const router = useRouter()
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -65,16 +63,22 @@ export function PhotoGrid({
     return () => { if (el) observer.unobserve(el) }
   }, [photos.length, loading, hasMore, groupId, pageSize])
 
-  async function setCover(photoUrl: string) {
-    const fd = new FormData()
-    fd.set("groupId", groupId)
-    fd.set("photoUrl", photoUrl)
-    await fetch("/api/set-cover", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ groupId, photoUrl }),
-    })
-    router.refresh()
+  async function handleSetCover(photoUrl: string) {
+    try {
+      const res = await fetch("/api/set-cover", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ groupId, photoUrl }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        alert(data.error || "Failed to set cover")
+        return
+      }
+      window.location.reload()
+    } catch {
+      alert("Network error")
+    }
   }
 
   if (photos.length === 0) {
@@ -127,7 +131,7 @@ export function PhotoGrid({
                     <button
                       onClick={(e) => {
                         e.preventDefault()
-                        setCover(photo.url)
+                        handleSetCover(photo.url)
                       }}
                       className="text-[11px] text-primary hover:text-white transition-colors"
                     >

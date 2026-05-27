@@ -199,7 +199,7 @@ export async function transferOwnership(formData: FormData) {
   revalidatePath(`/groups/${groupId}`)
 }
 
-export async function setGroupCover(formData: FormData) {
+export async function setGroupCover(groupId: string, photoUrl: string) {
   const supabase = await createClient()
 
   const {
@@ -207,17 +207,14 @@ export async function setGroupCover(formData: FormData) {
   } = await supabase.auth.getUser()
   if (!user) return { error: "Not authenticated" }
 
-  const groupId = formData.get("groupId") as string
-  const photoUrl = formData.get("photoUrl") as string
-
   const { data: member } = await supabase
     .from("group_members")
     .select("role")
     .eq("group_id", groupId)
     .eq("user_id", user.id)
-    .single()
+    .maybeSingle()
 
-  if (member?.role !== "admin") return { error: "Not authorized" }
+  if (!member || member.role !== "admin") return { error: "Not authorized" }
 
   const { error } = await supabase
     .from("groups")

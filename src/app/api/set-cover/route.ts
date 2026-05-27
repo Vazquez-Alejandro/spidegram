@@ -19,9 +19,9 @@ export async function POST(request: Request) {
     .select("role")
     .eq("group_id", groupId)
     .eq("user_id", user.id)
-    .single()
+    .maybeSingle()
 
-  if (member?.role !== "admin") {
+  if (!member || member.role !== "admin") {
     return NextResponse.json({ error: "Not authorized" }, { status: 403 })
   }
 

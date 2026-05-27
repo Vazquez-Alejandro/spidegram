@@ -184,7 +184,7 @@ export default async function GroupPage(props: {
       </section>
 
       <section className="mb-10">
-        <InviteLink groupId={id} />
+        <InviteLink groupId={id} origin={process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"} />
       </section>
 
       {isAdmin && pendingPhotos && pendingPhotos.length > 0 && (
