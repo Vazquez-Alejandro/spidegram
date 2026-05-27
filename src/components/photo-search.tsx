@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { PhotoLightbox } from "./photo-lightbox"
+import { optimizeUrl } from "@/lib/image"
 
 type Photo = {
   id: string
@@ -76,11 +77,12 @@ export function PhotoSearch({
               key={photo.id}
               className="aspect-square rounded-2xl bg-surface overflow-hidden group relative ring-1 ring-white/5 hover:ring-primary/30 transition-all"
             >
-              <PhotoLightbox src={photo.url} alt={photo.caption ?? ""}>
-                <img
-                  src={photo.url}
-                  alt={photo.caption ?? ""}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+            <PhotoLightbox src={photo.url} alt={photo.caption ?? ""}>
+              <img
+                src={optimizeUrl(photo.url, { width: 400, height: 400, format: "webp" }) ?? photo.url}
+                alt={photo.caption ?? ""}
+                loading="lazy"
+                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                 />
               </PhotoLightbox>
               <a

@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { optimizeUrl } from "@/lib/image"
 
 type PendingPhoto = {
   id: string
@@ -117,10 +118,11 @@ export function BulkActions({
                   className="rounded border-border bg-black/50 text-primary focus:ring-primary/50"
                 />
               </label>
-              <img
-                src={photo.url}
-                alt={photo.caption ?? ""}
-                className="w-full h-full object-cover"
+                <img
+                  src={optimizeUrl(photo.url, { width: 200, height: 200, format: "webp" }) ?? photo.url}
+                  alt={photo.caption ?? ""}
+                  loading="lazy"
+                  className="w-full h-full object-cover"
               />
               <div className="absolute top-2 right-2">
                 <span className="text-[10px] font-medium bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded-full backdrop-blur-sm">

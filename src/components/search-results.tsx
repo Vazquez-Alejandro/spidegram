@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { optimizeUrl } from "@/lib/image"
 
 type Photo = {
   id: string
@@ -88,7 +89,7 @@ export function SearchResults({
                   className="aspect-square rounded-2xl bg-surface overflow-hidden group relative ring-1 ring-white/5 hover:ring-primary/30 transition-all"
                 >
                   <img
-                    src={p.url}
+                    src={optimizeUrl(p.url, { width: 400, height: 400, format: "webp" }) ?? p.url}
                     alt={p.caption ?? ""}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />

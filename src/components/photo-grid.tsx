@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { PhotoLightbox } from "./photo-lightbox"
+import { optimizeUrl } from "@/lib/image"
 
 type Photo = {
   id: string
@@ -114,8 +115,9 @@ export function PhotoGrid({
             >
               <PhotoLightbox src={photo.url} alt={photo.caption ?? ""}>
                 <img
-                  src={photo.url}
+                  src={optimizeUrl(photo.url, { width: 400, height: 400, format: "webp" }) ?? photo.url}
                   alt={photo.caption ?? ""}
+                  loading="lazy"
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                 />
               </PhotoLightbox>

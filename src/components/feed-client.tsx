@@ -1,6 +1,7 @@
 "use client"
 
 import { useRouter } from "next/navigation"
+import { optimizeUrl } from "@/lib/image"
 import { useState, useEffect } from "react"
 import { PullToRefresh } from "./pull-to-refresh"
 import { FeedCardSkeleton } from "./skeleton"
@@ -100,8 +101,9 @@ export function FeedClient({ data }: { data: FeedData }) {
                   </div>
                   <a href={`/photos/${photo.id}`}>
                     <img
-                      src={photo.url}
+                      src={optimizeUrl(photo.url, { width: 1200, format: "webp" }) ?? photo.url}
                       alt={photo.caption ?? ""}
+                      loading="lazy"
                       className="w-full max-h-[600px] object-cover"
                     />
                   </a>

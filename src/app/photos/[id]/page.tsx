@@ -6,6 +6,7 @@ import { EditCaption } from "@/components/edit-caption"
 import { SharePhoto } from "@/components/share-photo"
 import { RealtimeComments } from "@/components/realtime-comments"
 import { ReportButton } from "@/components/report-button"
+import { optimizeUrl } from "@/lib/image"
 
 export async function generateMetadata(props: {
   params: Promise<{ id: string }>
@@ -150,7 +151,7 @@ export default async function PhotoPage(props: {
       <div className="grid md:grid-cols-5 gap-0 md:gap-8">
         <div className="md:col-span-3 rounded-2xl overflow-hidden bg-surface ring-1 ring-white/5">
           <img
-            src={photo.url}
+            src={optimizeUrl(photo.url, { width: 1200, format: "webp" }) ?? photo.url}
             alt={photo.caption ?? ""}
             className="w-full object-cover"
           />
