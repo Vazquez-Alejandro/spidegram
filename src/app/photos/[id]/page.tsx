@@ -1,9 +1,10 @@
 import type { Metadata } from "next"
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
-import { addComment, toggleReaction, deletePhoto } from "@/lib/supabase/photos"
+import { toggleReaction, deletePhoto } from "@/lib/supabase/photos"
 import { EditCaption } from "@/components/edit-caption"
 import { SharePhoto } from "@/components/share-photo"
+import { RealtimeComments } from "@/components/realtime-comments"
 
 export async function generateMetadata(props: {
   params: Promise<{ id: string }>
@@ -206,53 +207,13 @@ export default async function PhotoPage(props: {
             )}
           </div>
 
-          <div className="flex-1 flex flex-col">
-            <div className="flex items-center gap-3 mb-3">
-              <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Comments</h3>
-              <span className="text-[11px] font-medium text-gray-500 bg-white/5 px-2 py-0.5 rounded-full">
-                {comments.length}
-              </span>
-              <div className="h-px flex-1 bg-border" />
-            </div>
-            <div className="space-y-3 mb-4 max-h-80 overflow-y-auto flex-1">
-              {comments.length === 0 ? (
-                <p className="text-sm text-gray-500">No comments yet.</p>
-              ) : (
-                comments.map((c) => (
-                  <div key={c.id} className="text-sm flex items-start gap-2">
-                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-[9px] font-bold shrink-0 mt-0.5">
-                      {profileMap.get(c.user_id)?.full_name?.charAt(0) ||
-                        profileMap.get(c.user_id)?.username?.charAt(0) ||
-                        "?"}
-                    </div>
-                    <div>
-                      <span className="font-medium text-white">
-                        {profileMap.get(c.user_id)?.full_name ||
-                          profileMap.get(c.user_id)?.username ||
-                          "Anon"}
-                      </span>
-                      <span className="text-gray-300 ml-1.5">{c.content}</span>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-            <form action={addComment.bind(null, photo.id)} className="flex gap-2 mt-auto">
-              <input
-                name="content"
-                type="text"
-                required
-                placeholder="Write a comment..."
-                className="flex-1 rounded-xl border border-border bg-surface px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all"
-              />
-              <button
-                type="submit"
-                className="rounded-xl bg-gradient-to-r from-primary to-accent px-5 py-2.5 text-sm font-semibold hover:opacity-90 transition-all shrink-0"
-              >
-                Post
-              </button>
-            </form>
-          </div>
+          <RealtimeComments
+            photoId={photo.id}
+            initialComments={comments}
+            initialProfiles={Object.fromEntries(
+              [...profileMap.entries()].map(([id, p]) => [id, { username: p.username, full_name: p.full_name }])
+            )}
+          />
         </div>
       </div>
     </main>
