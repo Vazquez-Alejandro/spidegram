@@ -11,6 +11,7 @@ import { PhotoSearch } from "@/components/photo-search"
 import { BulkActions } from "@/components/bulk-actions"
 import { ActivityFeed } from "@/components/activity-feed"
 import { AlbumTabs, CreateAlbumForm } from "@/components/album-tabs"
+import { GroupAnalytics } from "@/components/group-analytics"
 
 export async function generateMetadata(props: {
   params: Promise<{ id: string }>
@@ -98,6 +99,33 @@ export default async function GroupPage(props: {
     .eq("group_id", id)
     .eq("status", "approved")
     .order("created_at", { ascending: false })
+
+  let memberStats: { user_id: string; name: string; photo_count: number; last_upload: string | null }[] = []
+  if (isAdmin) {
+    const { data: photoUploaders } = await supabase
+      .from("photos")
+      .select("uploader_id, created_at")
+      .eq("group_id", id)
+      .eq("status", "approved")
+
+    const uploadCounts: Record<string, { count: number; last: string | null }> = {}
+    for (const p of photoUploaders ?? []) {
+      if (!uploadCounts[p.uploader_id]) uploadCounts[p.uploader_id] = { count: 0, last: null }
+      uploadCounts[p.uploader_id].count++
+      if (!uploadCounts[p.uploader_id].last || p.created_at > uploadCounts[p.uploader_id].last!) {
+        uploadCounts[p.uploader_id].last = p.created_at
+      }
+    }
+
+    memberStats = Object.entries(uploadCounts)
+      .map(([uid, stats]) => ({
+        user_id: uid,
+        name: memberMap.get(uid)?.full_name || memberMap.get(uid)?.username || uid.slice(0, 8),
+        photo_count: stats.count,
+        last_upload: stats.last,
+      }))
+      .sort((a, b) => b.photo_count - a.photo_count)
+  }
 
   const { data: albums } = await supabase
     .from("albums")
@@ -256,6 +284,22 @@ export default async function GroupPage(props: {
                 uploaderMap.get(p.uploader_id)?.full_name ||
                 "Unknown",
             }))}
+          />
+        </section>
+      )}
+
+      {isAdmin && (
+        <section className="mb-10">
+          <div className="flex items-center gap-3 mb-4">
+            <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Analytics</h2>
+            <div className="h-px flex-1 bg-border" />
+          </div>
+          <GroupAnalytics
+            totalPhotos={approvedPhotos?.length ?? 0}
+            totalMembers={members?.length ?? 0}
+            pendingCount={pendingPhotos?.length ?? 0}
+            memberStats={memberStats}
+            createdAt={group.created_at}
           />
         </section>
       )}
