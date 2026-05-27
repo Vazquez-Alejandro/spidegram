@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { signOut } from "@/lib/supabase/actions"
 import { ThemeToggle } from "./theme-toggle"
+import { Avatar } from "./avatar"
 
 export async function Navbar() {
   const supabase = await createClient()
@@ -71,13 +72,7 @@ export async function Navbar() {
               </NavIcon>
 
               <NavIcon href={`/profile/${user.id}`} label="Profile">
-                {avatarUrl ? (
-                  <img src={avatarUrl} alt="" className="w-7 h-7 rounded-full object-cover" />
-                ) : (
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                )}
+                <Avatar url={avatarUrl} name={name} size="sm" />
               </NavIcon>
 
               <div className="w-px h-6 bg-border mx-1" />
@@ -142,13 +137,7 @@ export async function Navbar() {
               )}
             </MobileNavIcon>
             <MobileNavIcon href={`/profile/${user.id}`} label="Profile">
-              {avatarUrl ? (
-                <img src={avatarUrl} alt="" className="w-6 h-6 rounded-full object-cover ring-1 ring-border" />
-              ) : (
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-              )}
+              <Avatar url={avatarUrl} name={name} size="sm" />
             </MobileNavIcon>
           </div>
         </nav>

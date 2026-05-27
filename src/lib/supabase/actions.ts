@@ -96,7 +96,7 @@ export async function updateAvatar(formData: FormData) {
   const filePath = `avatars/${user.id}.${ext}`
 
   const { error: uploadError } = await supabase.storage
-    .from("photos")
+    .from("avatars")
     .upload(filePath, file, { upsert: true })
 
   if (uploadError) {
@@ -105,7 +105,7 @@ export async function updateAvatar(formData: FormData) {
 
   const {
     data: { publicUrl },
-  } = supabase.storage.from("photos").getPublicUrl(filePath)
+  } = supabase.storage.from("avatars").getPublicUrl(filePath)
 
   const { error: dbError } = await supabase
     .from("profiles")
