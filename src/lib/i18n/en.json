@@ -1,0 +1,96 @@
+{
+  "common": {
+    "appName": "Spidegram",
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "search": "Search",
+    "confirm": "Are you sure?",
+    "noResults": "No results found"
+  },
+  "nav": {
+    "feed": "Feed",
+    "groups": "My Groups",
+    "friends": "Friends",
+    "alerts": "Alerts",
+    "profile": "Profile",
+    "admin": "Admin",
+    "signOut": "Sign out",
+    "search": "Search"
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "signOut": "Sign Out",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot password?",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "resetPassword": "Reset Password"
+  },
+  "groups": {
+    "members": "members",
+    "member": "member",
+    "photos": "Photos",
+    "pending": "Pending approval",
+    "createGroup": "Create Group",
+    "joinGroup": "Join Group",
+    "leaveGroup": "Leave Group",
+    "noGroups": "No groups yet",
+    "noGroupsHint": "Create a new group or join an existing one.",
+    "searchGroups": "Search groups by name...",
+    "uploadPhoto": "Upload photos",
+    "addStory": "Add Story",
+    "recentActivity": "Recent Activity",
+    "analytics": "Analytics",
+    "inviteLink": "Invite Link"
+  },
+  "photos": {
+    "comments": "Comments",
+    "noComments": "No comments yet.",
+    "writeComment": "Write a comment...",
+    "post": "Post",
+    "download": "Download",
+    "report": "Report",
+    "delete": "Delete",
+    "likes": "likes",
+    "like": "like",
+    "previous": "Previous",
+    "next": "Next"
+  },
+  "feed": {
+    "title": "Feed",
+    "empty": "No photos in your feed yet.",
+    "emptyHint": "Follow friends or join groups to see their photos here."
+  },
+  "profile": {
+    "edit": "Edit profile",
+    "fullName": "Full name",
+    "username": "Username",
+    "changePhoto": "Change photo",
+    "noPhotos": "No photos uploaded yet."
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "No notifications yet.",
+    "markRead": "Mark all as read"
+  },
+  "stories": {
+    "share": "Share Story",
+    "cancel": "Cancel",
+    "posting": "Posting..."
+  },
+  "reports": {
+    "title": "Reports",
+    "pending": "pending",
+    "dismiss": "Dismiss",
+    "keepRemoved": "Keep removed",
+    "reportPhoto": "Report photo",
+    "reason": "Why are you reporting this photo?",
+    "submit": "Submit report",
+    "thanks": "Report submitted. A group admin will review it."
+  }
+}

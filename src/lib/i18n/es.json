@@ -1,0 +1,96 @@
+{
+  "common": {
+    "appName": "Spidegram",
+    "loading": "Cargando...",
+    "error": "Algo salió mal",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "search": "Buscar",
+    "confirm": "¿Estás seguro?",
+    "noResults": "Sin resultados"
+  },
+  "nav": {
+    "feed": "Inicio",
+    "groups": "Mis Grupos",
+    "friends": "Amigos",
+    "alerts": "Alertas",
+    "profile": "Perfil",
+    "admin": "Admin",
+    "signOut": "Cerrar sesión",
+    "search": "Buscar"
+  },
+  "auth": {
+    "signIn": "Iniciar sesión",
+    "signUp": "Registrarse",
+    "signOut": "Cerrar sesión",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+    "noAccount": "¿No tienes cuenta?",
+    "hasAccount": "¿Ya tienes cuenta?",
+    "resetPassword": "Restablecer contraseña"
+  },
+  "groups": {
+    "members": "miembros",
+    "member": "miembro",
+    "photos": "Fotos",
+    "pending": "Pendientes",
+    "createGroup": "Crear grupo",
+    "joinGroup": "Unirse",
+    "leaveGroup": "Salir",
+    "noGroups": "No tienes grupos",
+    "noGroupsHint": "Crea un grupo nuevo o únete a uno existente.",
+    "searchGroups": "Buscar grupos por nombre...",
+    "uploadPhoto": "Subir fotos",
+    "addStory": "Agregar historia",
+    "recentActivity": "Actividad reciente",
+    "analytics": "Estadísticas",
+    "inviteLink": "Enlace de invitación"
+  },
+  "photos": {
+    "comments": "Comentarios",
+    "noComments": "Sin comentarios.",
+    "writeComment": "Escribe un comentario...",
+    "post": "Publicar",
+    "download": "Descargar",
+    "report": "Reportar",
+    "delete": "Eliminar",
+    "likes": "me gusta",
+    "like": "me gusta",
+    "previous": "Anterior",
+    "next": "Siguiente"
+  },
+  "feed": {
+    "title": "Inicio",
+    "empty": "Tu feed está vacío.",
+    "emptyHint": "Sigue a amigos o únete a grupos para ver sus fotos aquí."
+  },
+  "profile": {
+    "edit": "Editar perfil",
+    "fullName": "Nombre completo",
+    "username": "Usuario",
+    "changePhoto": "Cambiar foto",
+    "noPhotos": "Aún no has subido fotos."
+  },
+  "notifications": {
+    "title": "Notificaciones",
+    "empty": "Sin notificaciones.",
+    "markRead": "Marcar todo como leído"
+  },
+  "stories": {
+    "share": "Compartir historia",
+    "cancel": "Cancelar",
+    "posting": "Publicando..."
+  },
+  "reports": {
+    "title": "Reportes",
+    "pending": "pendientes",
+    "dismiss": "Descartar",
+    "keepRemoved": "Mantener eliminado",
+    "reportPhoto": "Reportar foto",
+    "reason": "¿Por qué reportas esta foto?",
+    "submit": "Enviar reporte",
+    "thanks": "Reporte enviado. Un administrador lo revisará."
+  }
+}
