@@ -135,6 +135,14 @@ export function PhotoGrid({
                   >
                     View details →
                   </a>
+                  <a
+                    href={photo.url}
+                    download
+                    onClick={(e) => e.stopPropagation()}
+                    className="text-[11px] text-gray-400 hover:text-white transition-colors"
+                  >
+                    Download
+                  </a>
                   {isAdmin && !isCover && (
                     <button
                       onClick={(e) => {
