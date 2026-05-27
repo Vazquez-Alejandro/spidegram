@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
 import { signOut } from "@/lib/supabase/actions"
+import { ThemeToggle } from "./theme-toggle"
 
 export async function Navbar() {
   const supabase = await createClient()
@@ -80,6 +81,8 @@ export async function Navbar() {
               </NavIcon>
 
               <div className="w-px h-6 bg-border mx-1" />
+
+              <ThemeToggle />
 
               <NavIcon href="/dashboard" label="My Groups">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
