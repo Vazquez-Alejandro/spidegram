@@ -19,9 +19,9 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - Auth callback at `/auth/callback`
 
 ## Database
-- Schema: `supabase/migrations/00001_initial_schema.sql` + `00002_social_features.sql`
-- Tables: groups, group_members, photos, photo_comments, friendships, reactions, profiles
-- RLS: group-scoped access (members/admins only), friendships, reactions, public photo comments
+- Schema: `supabase/migrations/00001_initial_schema.sql` through `00010_admin.sql`
+- Tables: groups, group_members, photos, photo_comments, friendships, reactions, profiles, albums, stories, story_views, reports, super_admins
+- RLS: group-scoped access (members/admins only), friendships, reactions, public photo comments, stories (group-scoped + 24h expiry), reports (admin-only)
 
 ## Conventions
 - `params` and `searchParams` are Promises — always `await`
@@ -55,3 +55,18 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - [x] Feed social — fotos públicas de amigos
 - [x] Seguir/amigos — UI de friendships + búsqueda
 - [x] Notificaciones — schema + triggers + página + badge en navbar
+- [x] Álbumes — schema, CRUD, upload filter, grid filter, group tabs
+- [x] Descarga de fotos — botón en detalle + overlay en grilla
+- [x] Búsqueda global — /search con resultados de fotos, grupos, personas
+- [x] Analytics de grupo — stats cards + leaderboard (admin)
+- [x] Modo claro/oscuro — ThemeToggle con persistencia localStorage
+- [x] Stories (Instagram) — upload, viewer full-screen, rings en grupo
+- [x] Avatar uploads — bucket + Avatar component + navbar/profile
+- [x] Comentarios en tiempo real — Realtime subscription
+- [x] Moderación — reportar fotos + admin panel de reports
+- [x] Admin dashboard — stats globales para super-admins
+- [x] PWA — manifest + service worker
+- [x] SEO — metadata, sitemap, robots.txt
+- [x] Error/loading boundaries — 11 rutas con error + loading states
+- [x] CI/CD — GitHub Actions (lint → build → test)
+- [x] Tests — 13 unit tests, 3 E2E tests
