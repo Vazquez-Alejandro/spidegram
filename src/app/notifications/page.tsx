@@ -1,6 +1,11 @@
+import type { Metadata } from "next"
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { markNotificationRead, markAllNotificationsRead } from "@/lib/supabase/social"
+
+export const metadata: Metadata = {
+  title: "Notifications — Spidegram",
+}
 
 const notificationLabels: Record<string, string> = {
   photo_uploaded: "uploaded a photo for your approval",

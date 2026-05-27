@@ -1,7 +1,12 @@
+import type { Metadata } from "next"
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { resendVerification } from "@/lib/supabase/actions"
 import { DashboardClient } from "@/components/dashboard-client"
+
+export const metadata: Metadata = {
+  title: "My Groups — Spidegram",
+}
 
 export default async function DashboardPage(props: {
   searchParams: Promise<{ q?: string }>

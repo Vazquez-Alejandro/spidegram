@@ -1,6 +1,22 @@
+import type { Metadata } from "next"
 import { redirect, notFound } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { followUser, unfollowUser } from "@/lib/supabase/social"
+
+export async function generateMetadata(props: {
+  params: Promise<{ id: string }>
+}): Promise<Metadata> {
+  const { id } = await props.params
+  const supabase = await createClient()
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("full_name, username")
+    .eq("id", id)
+    .single()
+
+  const name = profile?.full_name || profile?.username || "Profile"
+  return { title: `${name} — Spidegram` }
+}
 
 export default async function ProfilePage(props: {
   params: Promise<{ id: string }>

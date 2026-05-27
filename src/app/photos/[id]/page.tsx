@@ -1,8 +1,27 @@
+import type { Metadata } from "next"
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { addComment, toggleReaction, deletePhoto } from "@/lib/supabase/photos"
 import { EditCaption } from "@/components/edit-caption"
 import { SharePhoto } from "@/components/share-photo"
+
+export async function generateMetadata(props: {
+  params: Promise<{ id: string }>
+}): Promise<Metadata> {
+  const { id } = await props.params
+  const supabase = await createClient()
+  const { data: photo } = await supabase
+    .from("photos")
+    .select("caption")
+    .eq("id", id)
+    .single()
+
+  return {
+    title: photo?.caption
+      ? `${photo.caption.slice(0, 50)} — Spidegram`
+      : "Photo — Spidegram",
+  }
+}
 
 export default async function PhotoPage(props: {
   params: Promise<{ id: string }>

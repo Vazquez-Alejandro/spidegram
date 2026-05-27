@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { PhotoUpload } from "@/components/photo-upload"
@@ -9,6 +10,22 @@ import { InviteLink } from "@/components/invite-link"
 import { PhotoSearch } from "@/components/photo-search"
 import { BulkActions } from "@/components/bulk-actions"
 import { ActivityFeed } from "@/components/activity-feed"
+
+export async function generateMetadata(props: {
+  params: Promise<{ id: string }>
+}): Promise<Metadata> {
+  const { id } = await props.params
+  const supabase = await createClient()
+  const { data: group } = await supabase
+    .from("groups")
+    .select("name")
+    .eq("id", id)
+    .single()
+
+  return {
+    title: group ? `${group.name} — Spidegram` : "Group — Spidegram",
+  }
+}
 
 export default async function GroupPage(props: {
   params: Promise<{ id: string }>
@@ -149,9 +166,9 @@ export default async function GroupPage(props: {
             })) ?? []}
             currentUserId={user.id}
           />
-        ) : (
+        ) : members && members.length > 0 ? (
           <div className="flex flex-wrap gap-2">
-            {members?.map((m) => {
+            {members.map((m) => {
               const profile = memberMap.get(m.user_id)
               const name = profile?.full_name || profile?.username || m.user_id.slice(0, 8)
               const initial = name.charAt(0).toUpperCase()
@@ -172,6 +189,8 @@ export default async function GroupPage(props: {
               )
             })}
           </div>
+        ) : (
+          <p className="text-sm text-gray-500">No members found.</p>
         )}
       </section>
 

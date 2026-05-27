@@ -1,3 +1,9 @@
+import type { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: "Authentication Error — Spidegram",
+}
+
 export default async function AuthErrorPage(props: {
   searchParams: Promise<{ message?: string }>
 }) {

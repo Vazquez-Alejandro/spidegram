@@ -1,4 +1,9 @@
+import type { Metadata } from "next"
 import { signIn } from "@/lib/supabase/actions"
+
+export const metadata: Metadata = {
+  title: "Sign in — Spidegram",
+}
 
 export default function SignInPage() {
   return (

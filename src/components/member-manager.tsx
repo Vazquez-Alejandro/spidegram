@@ -55,6 +55,9 @@ export function MemberManager({
 
   return (
     <>
+      {members.length === 0 ? (
+        <p className="text-sm text-gray-500">No members found.</p>
+      ) : (
       <div className="space-y-2">
         {members.map((m) => (
           <div
@@ -91,6 +94,7 @@ export function MemberManager({
           </div>
         ))}
       </div>
+      )}
       <ConfirmModal
         open={confirmTarget?.type === "remove"}
         onConfirm={() => handleRemove(confirmTarget!.userId)}

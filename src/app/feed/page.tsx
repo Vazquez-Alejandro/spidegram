@@ -1,6 +1,11 @@
+import type { Metadata } from "next"
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { FeedClient } from "@/components/feed-client"
+
+export const metadata: Metadata = {
+  title: "Feed — Spidegram",
+}
 
 export default async function FeedPage() {
   const supabase = await createClient()

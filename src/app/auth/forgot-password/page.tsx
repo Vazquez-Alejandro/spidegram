@@ -1,6 +1,11 @@
+import type { Metadata } from "next"
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { resetPasswordRequest } from "@/lib/supabase/actions"
+
+export const metadata: Metadata = {
+  title: "Reset password — Spidegram",
+}
 
 export default async function ForgotPasswordPage() {
   const supabase = await createClient()

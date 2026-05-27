@@ -31,6 +31,30 @@ export function DashboardClient({ groups }: { groups: Group[] }) {
     )
   }
 
+  if (groups.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 text-gray-500">
+        <div className="text-5xl mb-4">📸</div>
+        <p className="text-lg font-medium">No groups yet</p>
+        <p className="mt-1 text-sm">Create a new group or join an existing one.</p>
+        <div className="flex gap-3 mt-6">
+          <a
+            href="/groups/new"
+            className="rounded-xl bg-gradient-to-r from-primary to-accent px-5 py-2.5 text-sm font-semibold hover:opacity-90 transition-all shadow-lg shadow-primary/20"
+          >
+            Create Group
+          </a>
+          <a
+            href="/groups/join"
+            className="rounded-xl border border-border px-5 py-2.5 text-sm font-semibold hover:bg-white/5 transition-all"
+          >
+            Join Group
+          </a>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {groups.map((group, i) => (

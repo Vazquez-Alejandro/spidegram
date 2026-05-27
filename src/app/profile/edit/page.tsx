@@ -1,6 +1,11 @@
+import type { Metadata } from "next"
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { updateProfile, updateAvatar } from "@/lib/supabase/actions"
+
+export const metadata: Metadata = {
+  title: "Edit profile — Spidegram",
+}
 
 export default async function EditProfilePage() {
   const supabase = await createClient()

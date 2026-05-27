@@ -1,5 +1,11 @@
+import type { Metadata } from "next"
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
+
+export const metadata: Metadata = {
+  title: "Spidegram",
+  description: "Private photo groups for the people who matter most",
+}
 
 export default async function Home() {
   const supabase = await createClient()

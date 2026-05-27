@@ -1,4 +1,9 @@
+import type { Metadata } from "next"
 import { updatePassword } from "@/lib/supabase/actions"
+
+export const metadata: Metadata = {
+  title: "Set new password — Spidegram",
+}
 
 export default function ResetPasswordPage() {
   return (

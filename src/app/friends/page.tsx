@@ -1,6 +1,11 @@
+import type { Metadata } from "next"
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { followUser, unfollowUser } from "@/lib/supabase/social"
+
+export const metadata: Metadata = {
+  title: "Friends — Spidegram",
+}
 
 export default async function FriendsPage(props: {
   searchParams: Promise<{ q?: string }>

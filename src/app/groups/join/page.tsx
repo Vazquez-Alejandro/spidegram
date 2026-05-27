@@ -1,7 +1,12 @@
+import type { Metadata } from "next"
 import { redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
 import { createClient } from "@/lib/supabase/server"
 import { joinGroup } from "@/lib/supabase/groups"
+
+export const metadata: Metadata = {
+  title: "Join a Group — Spidegram",
+}
 
 export default async function JoinGroupPage(props: {
   searchParams: Promise<{ id?: string }>
