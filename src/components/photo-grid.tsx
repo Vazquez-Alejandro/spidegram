@@ -101,13 +101,13 @@ export function PhotoGrid({
 
   return (
     <>
-      <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
+      <div className="columns-2 sm:columns-3 lg:columns-4 gap-3">
         {photos.map((photo) => {
           const isCover = currentCover === photo.url
           return (
             <div
               key={photo.id}
-              className={`aspect-square rounded-2xl bg-surface overflow-hidden group relative ring-1 transition-all ${
+              className={`break-inside-avoid mb-3 rounded-2xl bg-surface overflow-hidden group relative ring-1 transition-all ${
                 isCover
                   ? "ring-primary ring-2"
                   : "ring-white/5 hover:ring-primary/30"
@@ -115,7 +115,7 @@ export function PhotoGrid({
             >
               <PhotoLightbox src={photo.url} alt={photo.caption ?? ""}>
                 <img
-                  src={optimizeUrl(photo.url, { width: 400, height: 400, format: "webp" }) ?? photo.url}
+                  src={optimizeUrl(photo.url, { width: 400, format: "webp" }) ?? photo.url}
                   alt={photo.caption ?? ""}
                   loading="lazy"
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
