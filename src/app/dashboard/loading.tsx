@@ -1,4 +1,4 @@
-import { GroupCardSkeleton } from "@/components/skeleton"
+import { GroupCardSkeleton, Skeleton } from "@/components/skeleton"
 
 export default function DashboardLoading() {
   return (
@@ -14,8 +14,4 @@ export default function DashboardLoading() {
       </div>
     </main>
   )
-}
-
-function Skeleton({ className = "" }: { className?: string }) {
-  return <div className={`animate-pulse rounded-xl bg-white/5 ${className}`} />
 }

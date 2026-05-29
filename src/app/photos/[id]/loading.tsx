@@ -1,3 +1,5 @@
+import { Skeleton } from "@/components/skeleton"
+
 export default function PhotoLoading() {
   return (
     <main className="flex-1 mx-auto max-w-4xl w-full px-4 py-8">
@@ -28,8 +30,4 @@ export default function PhotoLoading() {
       </div>
     </main>
   )
-}
-
-function Skeleton({ className = "" }: { className?: string }) {
-  return <div className={`animate-pulse rounded-xl bg-white/5 ${className}`} />
 }
