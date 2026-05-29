@@ -3,6 +3,7 @@ import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { FeedClient } from "@/components/feed-client"
 import { NotificationPrompt } from "@/components/notification-prompt"
+import { getTranslations } from "@/lib/i18n/server"
 
 export const metadata: Metadata = {
   title: "Feed — Spidegram",
@@ -10,6 +11,7 @@ export const metadata: Metadata = {
 
 export default async function FeedPage() {
   const supabase = await createClient()
+  const { t } = await getTranslations()
 
   const {
     data: { user },
