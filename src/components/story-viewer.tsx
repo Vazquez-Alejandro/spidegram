@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import type { Story } from "@/types"
 import { viewStory } from "@/lib/supabase/stories"
 
@@ -14,6 +14,9 @@ export function StoryViewer({ stories, initialIndex, onClose }: StoryViewerProps
   const [current, setCurrent] = useState(initialIndex)
   const [progress, setProgress] = useState(0)
   const [paused, setPaused] = useState(false)
+  const [swiping, setSwiping] = useState(false)
+  const [swipeX, setSwipeX] = useState(0)
+  const touchStart = useRef<{ x: number; y: number } | null>(null)
 
   const story = stories[current]
 
@@ -71,6 +74,31 @@ export function StoryViewer({ stories, initialIndex, onClose }: StoryViewerProps
 
   if (!story) return null
 
+  function handleTouchStart(e: React.TouchEvent) {
+    touchStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY }
+    setSwiping(true)
+  }
+
+  function handleTouchMove(e: React.TouchEvent) {
+    if (!touchStart.current) return
+    const dx = e.touches[0].clientX - touchStart.current.x
+    const dy = e.touches[0].clientY - touchStart.current.y
+    if (Math.abs(dx) > Math.abs(dy)) {
+      e.preventDefault()
+      setSwipeX(dx)
+    }
+  }
+
+  function handleTouchEnd() {
+    if (Math.abs(swipeX) > 50) {
+      if (swipeX < 0) goNext()
+      else goPrev()
+    }
+    touchStart.current = null
+    setSwiping(false)
+    setSwipeX(0)
+  }
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/95"
@@ -85,8 +113,9 @@ export function StoryViewer({ stories, initialIndex, onClose }: StoryViewerProps
       }}
       onMouseDown={() => setPaused(true)}
       onMouseUp={() => setPaused(false)}
-      onTouchStart={() => setPaused(true)}
-      onTouchEnd={() => setPaused(false)}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
     >
       {/* Progress bar */}
       <div className="absolute top-0 left-0 right-0 z-10 flex gap-1 p-2">
@@ -123,7 +152,13 @@ export function StoryViewer({ stories, initialIndex, onClose }: StoryViewerProps
       </div>
 
       {/* Media */}
-      <div className="max-h-[80vh] max-w-[90vw]">
+      <div
+        className="max-h-[80vh] max-w-[90vw] transition-transform"
+        style={{
+          transform: swiping ? `translateX(${swipeX * 0.5}px)` : "translateX(0)",
+          opacity: swiping ? 1 - Math.abs(swipeX) / 500 : 1,
+        }}
+      >
         {story.media_type === "video" ? (
           <video src={story.media_url} autoPlay muted loop className="max-h-[80vh] max-w-full rounded-xl" />
         ) : (
