@@ -1,0 +1,36 @@
+-- ============================================
+-- PASO 1: Crear tabla super_admins
+-- ============================================
+
+create table if not exists super_admins (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  created_at timestamptz not null default now()
+);
+
+alter table super_admins enable row level security;
+
+create policy "Super admins can view"
+  on super_admins for select
+  using (auth.uid() = user_id);
+
+create policy "Super admins can insert"
+  on super_admins for insert
+  with check (auth.uid() = user_id);
+
+create policy "Super admins can delete"
+  on super_admins for delete
+  using (auth.uid() = user_id);
+
+
+-- ============================================
+-- PASO 2: Hacerte super admin
+-- ============================================
+
+insert into super_admins (user_id) values ('93bb390f-5d41-448b-b5f0-07ecf61130e3');
+
+
+-- ============================================
+-- PASO 3: Habilitar Realtime en photos_comments (si no ya)
+-- ============================================
+
+alter publication supabase_realtime add table photo_comments;
